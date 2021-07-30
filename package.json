@@ -2,20 +2,25 @@
   "name": "fse-server",
   "version": "0.1.0",
   "description": "The central server of Film Submission Express",
-  "main": "dist/app.js",
+  "exports": "./dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "ts-node ./src/app.ts",
+    "start": "tsc && node ./dist/app.js",
     "dev": "nodemon",
     "build": "rimraf ./build && tsc"
   },
   "author": "Igrium",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@types/express": "^4.17.13",
     "@types/node": "^16.4.7",
     "nodemon": "^2.0.12",
     "rimraf": "^3.0.2",
-    "ts-node": "^10.1.0",
     "typescript": "^4.3.5"
-  }
+  },
+  "dependencies": {
+    "express": "^4.17.1",
+    "lowdb": "^2.1.0"
+  },
+  "type": "module"
 }
