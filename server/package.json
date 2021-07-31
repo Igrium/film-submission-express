@@ -20,6 +20,7 @@
   },
   "dependencies": {
     "express": "^4.17.1",
+    "fse-shared": "file:../shared",
     "lowdb": "^2.1.0"
   },
   "type": "module"

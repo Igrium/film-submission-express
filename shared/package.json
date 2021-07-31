@@ -1,0 +1,17 @@
+{
+  "name": "fse-shared",
+  "version": "0.1.0",
+  "description": "FSE code that's shared across devices",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "rimraf ./build && tsc"
+  },
+  "author": "Igrium",
+  "license": "GPL-3.0-or-later",
+  "type": "module",
+  "devDependencies": {
+    "rimraf": "^3.0.2",
+    "typescript": "^4.3.5"
+  }
+}

@@ -2,13 +2,13 @@ import fs from 'fs'
 
 export interface Config {
     data_folder: string
-    port: 3000
+    port: number
 }
 
 export function getDefaultConfig(): Config {
     return {
         data_folder: './data',
-        port: 3000
+        port: 5000
     };
 }
 

@@ -2,7 +2,7 @@ import { Low, JSONFile } from 'lowdb'
 import path from "path";
 import fs from 'fs';
 import { Config } from "./config.js";
-import { FilmInfo } from "./meta.js";
+import { FilmInfo } from "fse-shared/src/meta";
 import EventEmitter from 'events';
 
 export interface PBDatabase {

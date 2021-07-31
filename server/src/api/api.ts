@@ -9,7 +9,7 @@ import { Router } from "express";
  * @param app Express app.
  */
 export function initAPI(config: Config, playbill: PlayBill, app: Router) {
-    app.get('/films', (req, res) => {
+    app.get('/api/films', (req, res) => {
         if ('id' in req.query) {
             let id = req.query.id;
 
