@@ -1,6 +1,7 @@
 import { Config } from "../config.js";
 import PlayBill from "../playbill.js";
 import { Router } from "express";
+import { initUploadAPI } from "./upload.js";
 
 /**
  * Init an express app with a playbill.
@@ -22,4 +23,6 @@ export function initAPI(config: Config, playbill: PlayBill, app: Router) {
             res.json(playbill.films);
         }
     })
+
+    initUploadAPI(config, playbill, app);
 }

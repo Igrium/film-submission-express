@@ -27,9 +27,10 @@ export interface FilmInfo {
     filename: string
 
     /**
-     * The number of seconds in the film.
+     * The number of seconds in the film. 
+     * Undefined if the film hasn't been processed.
      */
-    length: number
+    length: number | undefined
 
     /**
      * Whether this 
