@@ -7,13 +7,11 @@ import logo from './logo.svg';
 function App() {
     return (
         <div className="App">
-            <FileUploadComponent onSubmit={handleUpload}/>
+            <FileUploadComponent onSubmit={(file, request) => {
+                upload(file, request);
+            }}/>
         </div>
     );
-}
-
-function handleUpload(file: File) {
-    upload(file);
 }
 
 export default App;

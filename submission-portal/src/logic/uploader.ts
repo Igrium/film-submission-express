@@ -1,9 +1,14 @@
+import { UploadRequest } from 'fse-shared/src/upload';
 import HugeUploader from 'huge-uploader'
 
-export function upload(file: File) {
+export function upload(file: File, request: UploadRequest) {
     console.log(`Submitting file: ${file}, ${typeof file}`);
 
-    const uploader = new HugeUploader({ endpoint: 'http://localhost:5000/upload/', file: file })
+    const uploader = new HugeUploader({
+        endpoint: 'http://localhost:5000/upload/',
+        file: file,
+        postParams: request
+    })
 
     // subscribe to events
     uploader.on('error', (err: any) => {
@@ -17,6 +22,5 @@ export function upload(file: File) {
     uploader.on('finish', (body: any) => {
         console.log('yeahhh - last response body:', body);
     });
-
-    uploader.togglePause();
+    
 }

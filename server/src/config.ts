@@ -3,12 +3,14 @@ import fs from 'fs'
 export interface Config {
     data_folder: string
     port: number
+    upload_chunk_size: number
 }
 
 export function getDefaultConfig(): Config {
     return {
         data_folder: './data',
-        port: 5000
+        port: 5000,
+        upload_chunk_size: 1
     };
 }
 

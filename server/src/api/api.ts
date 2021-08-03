@@ -1,7 +1,7 @@
 import { Config } from "../config.js";
 import PlayBill from "../playbill.js";
 import { Router } from "express";
-import { initUploadAPI } from "./upload.js";
+import { initUploadAPI } from "../upload.js";
 
 /**
  * Init an express app with a playbill.

@@ -1,3 +1,4 @@
+import cors from 'cors';
 import express from 'express';
 import fs from 'fs'
 import path from 'path'
@@ -14,9 +15,11 @@ async function start() {
         console.warn(`Data folder does not exist! Creating it at ${path.resolve(config.data_folder)}`);
         fs.mkdirSync(config.data_folder);
     }
-    
+    app.use(cors());
+
     playbill = new PlayBill(await loadDB(config));
     initAPI(config, playbill, app);
+    
     
     app.listen(config.port, () => {
         console.log(`Film Sumbission server started on port ${config.port}.`)

@@ -4,6 +4,25 @@ export enum ApprovalState {
     Rejected
 }
 
+export enum UploadState {
+    /**
+     * The film is still uploading from the producer's computer.
+     */
+    Uploading,
+    /**
+     * The final display version of the film is processing.
+     */
+    Processing,
+    /**
+     * The preview version that is streamable in realtime is processing.
+     */
+    ProcessingPreview,
+    /**
+     * The film has finished processing and is ready for approval.
+     */
+    Ready
+}
+
 /**
  * Basic metadata of a film.
  */
@@ -33,9 +52,9 @@ export interface FilmInfo {
     length: number | undefined
 
     /**
-     * Whether this 
+     * The upload state of this film.
      */
-    processed: boolean
+    uploadState: UploadState
 
     /**
      * The approval state of this film.

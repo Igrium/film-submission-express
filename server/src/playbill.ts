@@ -27,6 +27,12 @@ export default class PlayBill {
 
     constructor(db: Low<PBDatabase>) {
         this._db = db;
+        this.onUpdateFilm(() => {
+            db.write();
+        })
+        this.onUpdateOrder(() => {
+            db.write();
+        })
     }
 
     get database() {
