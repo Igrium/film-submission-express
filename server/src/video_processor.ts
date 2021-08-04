@@ -63,8 +63,7 @@ export default class VideoProcessor {
             console.log(`Transcode progress: ${progress.percentComplete}, ETA: ${progress.eta}`)
         }).on('end', () => {
             console.log(`Transcoded film '${item.id} to ${output}`);
-            this.playbill.films[item.id].uploadState = UploadState.Ready;
-            this.playbill.fireUpdateFilm(item.id);
+            this.playbill.database.push(`/films/${item.id}/uploadState`, UploadState.Ready);
             item.callback(output);
             this.advance();
         })

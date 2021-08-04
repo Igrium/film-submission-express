@@ -18,12 +18,14 @@ async function start() {
         fs.mkdirSync(config.data_folder);
     }
     app.use(cors());
-
     playbill = new PlayBill(await loadDB(config), config.data_folder);
     processor = new VideoProcessor(config, playbill);
     initAPI(config, playbill, app);
     
-    
+    app.get('/', function (req, res, next) {
+        res.render('index', { title: 'Express' });
+    });
+
     app.listen(config.port, () => {
         console.log(`Film Sumbission server started on port ${config.port}.`)
     });

@@ -1,9 +1,9 @@
-import { Low, JSONFile } from 'lowdb'
 import path from "path";
 import fs from 'fs';
 import { Config } from "./config.js";
 import { FilmInfo } from "fse-shared/src/meta";
 import EventEmitter from 'events';
+import { JsonDB } from 'node-json-db'
 
 export interface PBDatabase {
     /**
@@ -22,19 +22,19 @@ export interface PBDatabase {
  * but that would get confused with "application."
  */
 export default class PlayBill {
-    private _db: Low<PBDatabase>
+    private _db: JsonDB;
     public _emitter = new EventEmitter();
     private _dataFolder: string
 
-    constructor(db: Low<PBDatabase>, dataFolder: string) {
+    constructor(db: JsonDB, dataFolder: string) {
         this._db = db;
         this._dataFolder = dataFolder;
-        this.onUpdateFilm(() => {
-            db.write();
-        })
-        this.onUpdateOrder(() => {
-            db.write();
-        })
+        // this.onUpdateFilm(() => {
+        //     db.save();
+        // })
+        // this.onUpdateOrder(() => {
+        //     db.write();
+        // })
     }
 
     get database() {
@@ -49,59 +49,19 @@ export default class PlayBill {
         return this._dataFolder;
     }
 
-    private get data(): PBDatabase {
-        let data = this._db.data;
-        if (data == null) {
-            throw new ReferenceError("The playbill metadata hasn't been loaded!");
-        }
-        return data;
-    }
-
     /**
-     * All the films in the database. Make sure to call `fireUpdateFilm` after editing.
+     * All the films in the database.
      */
     get films() {
-        return this.data.films;
+        return this.database.getObject<Record<string, FilmInfo>>('/films');
     }
 
     /**
      * Film IDs in the order they will play in. Make sure to call `fireUpdateOrder` after editing.
      */
     get order() {
-        return this.data.order;
+        return this.database.getObject<string[]>('/order');
     }
-
-    /**
-     * Functions which modify the metadata of a film should call this when they're done.
-     * @param id ID of the film that was changed.
-     */
-    public fireUpdateFilm(id: String) {
-        this.emitter.emit('updateFilm', id);
-    }
-
-    /**
-     * Called when there has been an update to a film's metadata or a film has been added.
-     * @param listener Listener function.
-     */
-    public onUpdateFilm(listener: (id: string) => void) {
-        this.emitter.on('updateFilm', listener);
-    }
-
-    /**
-     * Functions that modify the film order should call this when they're done.
-     */
-    public fireUpdateOrder() {
-        this.emitter.emit('updateOrder', this.data.order);
-    }
-
-    /**
-     * Called when there's an update to the film order.
-     * @param listener Listener function.
-     */
-    public onUpdateOrder(listener: (newOrder: string[]) => void) {
-        this.emitter.on('updateOrder', listener);
-    }
-    
 }
 
 export async function loadDB(config: Config) {
@@ -116,8 +76,5 @@ export async function loadDB(config: Config) {
         fs.writeFileSync(file, JSON.stringify(db));
     }
 
-    let adapter = new JSONFile<PBDatabase>(file);
-    let db = new Low(adapter);
-    await db.read();
-    return db;
+    return new JsonDB(file, true, true);
 }
