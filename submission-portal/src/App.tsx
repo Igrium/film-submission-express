@@ -1,4 +1,4 @@
-import 'bootstrap/dist/css/bootstrap.min.css'
+import './css/bootstrap.css'
 import React from 'react';
 import FileUploadComponent from './components/FileUploadComponent';
 import { upload } from './logic/uploader';

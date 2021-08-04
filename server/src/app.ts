@@ -21,14 +21,11 @@ async function start() {
     app.use(cors());
     playbill = new PlayBill(await loadDB(config), config.data_folder);
     processor = new VideoProcessor(config, playbill);
+
     initAPI(config, playbill, app);
 
     app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
-
-
-    app.get('/', function (req, res, next) {
-        res.render('index', { title: 'Express' });
-    });
+    app.use('/admin', express.static(path.join(__dirname, '../../admin-panel/build/')));
 
     app.listen(config.port, () => {
         console.log(`Film Sumbission server started on port ${config.port}.`)
