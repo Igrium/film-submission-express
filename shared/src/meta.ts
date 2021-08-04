@@ -49,7 +49,7 @@ export interface FilmInfo {
      * The number of seconds in the film. 
      * Undefined if the film hasn't been processed.
      */
-    length: number | undefined
+    length?: number
 
     /**
      * The upload state of this film.

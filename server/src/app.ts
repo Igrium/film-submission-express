@@ -5,10 +5,12 @@ import path from 'path'
 import { initAPI } from './api/api.js';
 import { loadConfigSync } from './config.js';
 import PlayBill, { loadDB } from './playbill.js';
+import VideoProcessor from './video_processor.js';
 
 export const config = loadConfigSync();
 export const app = express();
 let playbill: PlayBill;
+export let processor: VideoProcessor;
 
 async function start() {
     if (!fs.existsSync(config.data_folder)) {
@@ -17,7 +19,8 @@ async function start() {
     }
     app.use(cors());
 
-    playbill = new PlayBill(await loadDB(config));
+    playbill = new PlayBill(await loadDB(config), config.data_folder);
+    processor = new VideoProcessor(config, playbill);
     initAPI(config, playbill, app);
     
     

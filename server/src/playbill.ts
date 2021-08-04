@@ -24,9 +24,11 @@ export interface PBDatabase {
 export default class PlayBill {
     private _db: Low<PBDatabase>
     public _emitter = new EventEmitter();
+    private _dataFolder: string
 
-    constructor(db: Low<PBDatabase>) {
+    constructor(db: Low<PBDatabase>, dataFolder: string) {
         this._db = db;
+        this._dataFolder = dataFolder;
         this.onUpdateFilm(() => {
             db.write();
         })
@@ -41,6 +43,10 @@ export default class PlayBill {
 
     get emitter() {
         return this._emitter;
+    }
+
+    get dataFolder() {
+        return this._dataFolder;
     }
 
     private get data(): PBDatabase {

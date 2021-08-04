@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import path from "path";
 import { ApprovalState, FilmInfo, UploadState } from '../../shared/dist/meta.js';
 import { UploadMeta, UploadRequest } from '../../shared/dist/upload.js';
+import { app, processor } from "./app.js";
 import { Config } from "./config.js";
 import PlayBill from "./playbill.js";
 
@@ -34,9 +35,9 @@ export interface FileUploadInfo {
     uploadedChunks: number
 }
 
-export function initUploadAPI(config: Config, playbill: PlayBill, app: Router) {
+export function initUploadAPI(config: Config, playbill: PlayBill, router: Router) {
 
-    app.post('/upload', (req, res) => {
+    router.post('/upload', (req, res) => {
         const tempdir = path.resolve(config.data_folder, 'uploads');
         if (!fs.existsSync(tempdir)) {
             fs.mkdirSync(tempdir, { recursive: true });
@@ -51,7 +52,7 @@ export function initUploadAPI(config: Config, playbill: PlayBill, app: Router) {
         })
     })
     
-    app.options('/upload', (req, res) => {
+    router.options('/upload', (req, res) => {
         res.setHeader('Access-Control-Allow-Origin', 'http://localhost:3000')
         res.setHeader('Access-Control-Allow-Methods', 'POST,OPTIONS');
         res.setHeader('Access-Control-Allow-Headers', 'uploader-chunk-number,uploader-chunks-total,uploader-file-id');
@@ -82,6 +83,7 @@ function handleFinishUpload(data: any, config: Config, playbill: PlayBill) {
 
     console.log(`Recieved film and assigned it id: '${id}'`);
     console.log(info);
+    processor.process(data.filePath, id, path.extname(info.filename));
 }
 
 function initUpload(request: UploadRequest, id: string, config: Config): UploadMeta {
