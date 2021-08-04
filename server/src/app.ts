@@ -6,6 +6,7 @@ import { initAPI } from './api/api.js';
 import { loadConfigSync } from './config.js';
 import PlayBill, { loadDB } from './playbill.js';
 import VideoProcessor from './video_processor.js';
+import proxy from 'express-http-proxy';
 
 export const config = loadConfigSync();
 export const app = express();
@@ -21,7 +22,10 @@ async function start() {
     playbill = new PlayBill(await loadDB(config), config.data_folder);
     processor = new VideoProcessor(config, playbill);
     initAPI(config, playbill, app);
-    
+
+    app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
+
+
     app.get('/', function (req, res, next) {
         res.render('index', { title: 'Express' });
     });
