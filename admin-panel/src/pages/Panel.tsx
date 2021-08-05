@@ -2,9 +2,10 @@ import { Component } from 'react'
 import { Container, Row, Col } from 'react-bootstrap'
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom'
 import '../css/dashboard.css'
-import Navbar from './Navbar'
+import Navbar from '../components/Navbar'
+import Submissions from './Submissions'
 
-export default class Dash extends Component {
+export default class Panel extends Component {
     render() {
         return (
             <Router basename='admin'>
@@ -13,6 +14,9 @@ export default class Dash extends Component {
                     <Switch>
                         <Route path='/playbill'>
                             Playbill
+                        </Route>
+                        <Route path='/submissions'>
+                            <Submissions />
                         </Route>
                         <Route path='/'>
                             Home

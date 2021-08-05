@@ -1,5 +1,5 @@
 import { Component } from 'react';
-import { Container, Nav } from 'react-bootstrap';
+import { Container, Dropdown, Nav } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
 
 export default class Navbar extends Component {
@@ -9,12 +9,9 @@ export default class Navbar extends Component {
                 <Container fluid>
                     <Link className='navbar-brand' to='/'>FSE Dashboard</Link>
                     <div className='collapse, navbar-collapse' id='navbarColor01'>
-                    <ul className='navbar-nav me-auto'>
-                        <li className='nav-auto'>
-                            <Link className='nav-link active' to='playbill'>Play Bill</Link>
-                        </li>
-                        <li className='nav-auto'>
-                            <Link className='nav-link active' to='playbill'>Play Bill</Link>
+                    <ul className='navbar-nav'>
+                        <li className='nav-item'>
+                            <Link className='nav-link' to='submissions'>Submissions</Link>
                         </li>
                     </ul>
                 </div>

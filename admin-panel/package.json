@@ -11,6 +11,7 @@
     "@types/react": "^17.0.15",
     "@types/react-dom": "^17.0.9",
     "@types/react-router-dom": "^5.1.8",
+    "axios": "^0.21.1",
     "bootstrap": "^5.0.2",
     "fse-shared": "file:../shared",
     "react": "^17.0.2",
@@ -45,5 +46,6 @@
       "last 1 safari version"
     ]
   },
-  "homepage": "admin"
+  "homepage": "admin",
+  "proxy": "http://localhost:5000"
 }

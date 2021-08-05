@@ -1,11 +1,11 @@
 import './css/bootstrap.css'
 import React from 'react';
-import Dash from './components/Dash';
+import Panel from './pages/Panel';
 import { Route } from 'react-router-dom';
 
 function App() {
     return (
-        <Dash />
+        <Panel />
     );
 }
 
