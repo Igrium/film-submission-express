@@ -10,8 +10,17 @@ export module api {
     export async function getFilms() {
         const response = await client.get('/api/films')
         if (response.status != 200) {
-            throw new Error(`HTTP request returned code ${response.status} (${response.statusText})`)
+            console.error(response.data);
+            throw new Error(`HTTP request returned code ${response.status} (${response.statusText})`);
         }
         return response.data as Record<string, FilmInfo>
+    }
+
+    export async function postFilm(id: string, info: Partial<FilmInfo>) {
+        const response = await client.post(`/api/films/${id}`, info);
+        if (response.status >= 400) {
+            console.error(response.data);
+            throw new Error(`Post request returned code ${response.status} (${response.statusText})`);
+        }
     }
 }
