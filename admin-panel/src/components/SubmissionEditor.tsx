@@ -1,19 +1,21 @@
 import { ApprovalState, FilmInfo, UploadState } from 'fse-shared/dist/meta';
 import { Component } from 'react';
-import { Alert, Badge, Button, ButtonGroup, ButtonToolbar, Col, Form, Row, ToggleButton } from 'react-bootstrap';
+import { Alert, Badge, Button, ButtonGroup, ButtonToolbar, Col, Form, Modal, Row, ToggleButton } from 'react-bootstrap';
 
 interface IProps {
     target: FilmInfo,
     id: string,
     onCancel?: () => void,
-    onApply?: (info: Partial<FilmInfo>) => void
+    onApply?: (info: Partial<FilmInfo>) => void,
+    onDelete?: () => void
 }
 
 interface IState {
     title: string,
     producer: string,
     email: string,
-    approvalState: ApprovalState
+    approvalState: ApprovalState,
+    showDeleteConfirmation: boolean
 }
 
 export default class SubmissionEditor extends Component<IProps, IState> {
@@ -26,10 +28,12 @@ export default class SubmissionEditor extends Component<IProps, IState> {
             title: target.title,
             producer: target.producer,
             email: target.email,
-            approvalState: target.approvalState
+            approvalState: target.approvalState,
+            showDeleteConfirmation: false
         }
 
         this.handleApply = this.handleApply.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
     
     changeStateAlert() {
@@ -55,6 +59,11 @@ export default class SubmissionEditor extends Component<IProps, IState> {
         }
 
         if (onApply) onApply(newVal);
+    }
+
+    handleDelete() {
+        this.setState({ showDeleteConfirmation: false });
+        if (this.props.onDelete) this.props.onDelete();
     }
 
     formatUploadState(uploadState: UploadState) {
@@ -147,12 +156,30 @@ export default class SubmissionEditor extends Component<IProps, IState> {
                     <Form.Label column sm={2}>Upload State</Form.Label>
                     {this.formatUploadState(target.uploadState)}
                 </Form>
-                <ButtonToolbar>
+                <ButtonToolbar style={{ display: 'flex', justifyContent: 'flex-end' }}>
                     <Button variant='secondary' className='mr-1' onClick={() => {
                         if (onCancel) onCancel();
                     }}>Cancel</Button>
+
+                    {this.props.onDelete ? <Button variant='danger' className='mr-1' onClick={() => {
+                        this.setState({ showDeleteConfirmation: true });
+                    }}>Delete</Button> : null}
+
                     <Button variant='primary' onClick={this.handleApply}>Apply</Button>
                 </ButtonToolbar>
+                <Modal show={state.showDeleteConfirmation} onHide={() => this.setState({ showDeleteConfirmation: false })}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Are you sure you want to delete?</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        <p>This cannot be undone, and if it's done in error,
+                             the producer will likely be very mad.</p>
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant='secondary' onClick={() => this.setState({ showDeleteConfirmation: false })}>Cancel</Button>
+                        <Button variant='danger' onClick={this.handleDelete}>Delete</Button>
+                    </Modal.Footer>
+                </Modal>
             </>
         )
     }

@@ -23,4 +23,11 @@ export module api {
             throw new Error(`Post request returned code ${response.status} (${response.statusText})`);
         }
     }
+
+    export async function deleteFilm(id: string) {
+        const response = await client.delete(`/api/films/${id}`);
+        if (response.status >= 400) {
+            throw new Error(`Delete request returned code ${response.status} (${response.statusText})`);
+        }
+    }
 }

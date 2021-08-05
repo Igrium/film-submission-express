@@ -26,6 +26,7 @@ export default class Submissions extends Component<any, IState> {
         this.handleSelect = this.handleSelect.bind(this);
         this.handleEdit = this.handleEdit.bind(this);
         this.handleApplyEdit = this.handleApplyEdit.bind(this);
+        this.handleDelete = this.handleDelete.bind(this);
     }
 
     componentDidMount() {
@@ -53,10 +54,20 @@ export default class Submissions extends Component<any, IState> {
         this.setState({ showEditor: false });
         api.postFilm(this.state.selected as string, info).catch(error => {
             console.error(error);
-            this.setState({ alert: { variant: 'danger', message: `Unable to POST submission! ${error}` } })
+            this.setState({ alert: { variant: 'danger', message: `Unable to POST submission! ${error}` } });
         }).then(() => {
             this.refreshTable();
         });
+    }
+
+    handleDelete() {
+        this.setState({ showEditor: false });
+        api.deleteFilm(this.state.selected as string).catch(error => {
+            console.error(error);
+            this.setState({ alert: { variant: 'danger', message: `Unable to DELETE submission! ${error}` } });
+        }).then(() => {
+            this.refreshTable();
+        })
     }
 
     render() {
@@ -79,9 +90,9 @@ export default class Submissions extends Component<any, IState> {
                         </Modal.Title>
                     </Modal.Header>
                     <Modal.Body>
-                        <SubmissionEditor target={films[selected as string]} id={selected as string} onApply={this.handleApplyEdit} onCancel={() => {
-                            this.setState({ showEditor: false });
-                        }}/>
+                        <SubmissionEditor target={films[selected as string]} id={selected as string}
+                        onApply={this.handleApplyEdit} onCancel={() => {this.setState({ showEditor: false });}}
+                        onDelete={this.handleDelete}/>
                     </Modal.Body>
                 </Modal>
                 <br />
