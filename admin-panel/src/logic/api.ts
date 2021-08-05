@@ -5,7 +5,7 @@ import { FilmInfo } from 'fse-shared/src/meta';
  * Handles interfacing with the FSE central API.
  */
 export module api {
-    export const client = axios.create({ timeout: 1000 })
+    export const client = axios.create({ timeout: 5000 })
 
     export async function getFilms() {
         const response = await client.get('/api/films')
