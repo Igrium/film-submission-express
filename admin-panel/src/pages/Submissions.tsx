@@ -1,6 +1,7 @@
 import { FilmInfo } from 'fse-shared/dist/meta';
 import { Component } from 'react';
 import { Alert, Button, Container, Modal } from 'react-bootstrap';
+import { useLocation, withRouter } from 'react-router-dom';
 import SubmissionEditor from '../components/SubmissionEditor';
 import SubmissionTable from '../components/SubmissionTable';
 import { api } from '../logic/api';
@@ -17,7 +18,7 @@ interface AlertState {
     message: string
 }
 
-export default class Submissions extends Component<any, IState> {
+class Submissions extends Component<any, IState> {
     constructor(props: any) {
         super(props);
         this.state = { films: {}, showEditor: false}
@@ -30,6 +31,10 @@ export default class Submissions extends Component<any, IState> {
 
     componentDidMount() {
         this.refreshTable();
+        let select = this.useQuery().get('select');
+        if (select) {
+            this.setState({ selected: select });
+        }
     }
 
     refreshTable() {
@@ -69,13 +74,20 @@ export default class Submissions extends Component<any, IState> {
         })
     }
 
+    /**
+     * Parse query string
+     */
+    useQuery() {
+        return new URLSearchParams(this.props.location.search);
+    }
+
     render() {
         const { films, selected, showEditor, alert } = this.state;
-
         return (
             <Container>
                 <br />
-                <SubmissionTable films={films} selectable caption='All submissions' onSelect={this.handleSelect}/>
+                <SubmissionTable films={films} selectable caption='All submissions' onSelect={this.handleSelect}
+                selection={selected} />
                 <Button onClick={() => this.refreshTable()} className='mr-1'>
                     <span className='glyphicon glyphicon-refresh' ></span> Refresh
                 </Button>
@@ -100,3 +112,5 @@ export default class Submissions extends Component<any, IState> {
         )
     }
 }
+
+export default withRouter(Submissions);

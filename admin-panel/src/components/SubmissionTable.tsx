@@ -7,7 +7,7 @@ interface ListingProps {
     id: string,
     film: FilmInfo,
     selected?: boolean,
-    onClick?: () => void
+    onClick?: () => void,
 }
 
 interface TableProps {
@@ -16,22 +16,18 @@ interface TableProps {
     filter?: (film: FilmInfo) => boolean,
     selectable?: boolean,
     onSelect?: (id: string) => void
-}
-
-interface TableState {
     selection?: string
+
 }
 
-export default class SubmissionTable extends Component<TableProps, TableState> {
+export default class SubmissionTable extends Component<TableProps> {
     constructor(props: TableProps) {
         super(props);
-
-        this.state = {};
     }
+    
 
     render() {
-        const { films, caption, filter, selectable, onSelect } = this.props;
-        const { selection } = this.state;
+        const { films, caption, filter, selectable, onSelect, selection } = this.props;
 
         let keys: string[];
         if (filter) {
@@ -53,7 +49,7 @@ export default class SubmissionTable extends Component<TableProps, TableState> {
                     </tr>
                 </thead>
                 <tbody>
-                    {keys.map(id => <SubmissionListing id={id} film={films[id]} selected={id === selection} onClick={() => {
+                    {keys.map(id => <SubmissionListing id={id} key={id} film={films[id]} selected={id === selection} onClick={() => {
                         if (!selectable) return;
                         this.setState({ selection: id });
                         if (onSelect) onSelect(id);

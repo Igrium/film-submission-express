@@ -1,6 +1,7 @@
 import { TranscodeStatus } from 'fse-shared/dist/meta';
 import { Component } from 'react';
-import { Alert, Container } from 'react-bootstrap';
+import { Alert, Card, Container } from 'react-bootstrap';
+import { withRouter } from 'react-router-dom';
 import PipelineView from '../components/PipelineView';
 import api from '../logic/api';
 
@@ -16,7 +17,7 @@ interface IState {
 
 const REFRESH_RATE = 2000;
 
-export default class Dashboard extends Component<any, IState> {
+class Dashboard extends Component<any, IState> {
     interval?: NodeJS.Timeout;
 
     constructor(props: any) {
@@ -27,6 +28,7 @@ export default class Dashboard extends Component<any, IState> {
         }
 
         this.reloadPipelineView = this.reloadPipelineView.bind(this);
+        this.handlePipelineOpen = this.handlePipelineOpen.bind(this);
     }
 
     componentDidMount() {
@@ -48,6 +50,10 @@ export default class Dashboard extends Component<any, IState> {
             this.setState({ alert: { variant: 'danger', message: `Error retrieving pipeline state: ${err}`} })
         });
     }
+
+    handlePipelineOpen(id: string) {
+        this.props.history.push(`/submissions?select=${id}`);
+    }
     
     render() {
         const { processing, alert } = this.state;
@@ -55,10 +61,16 @@ export default class Dashboard extends Component<any, IState> {
         return (
             <Container>
                 <br />
-                <h3>Pipeline</h3>
-                <PipelineView processing={processing} />
+                <Card>
+                    <Card.Header>Pipeline</Card.Header>
+                    <Card.Body>
+                        <PipelineView processing={processing} onOpen={this.handlePipelineOpen} />
+                    </Card.Body>
+                </Card>
                 {alert ? <Alert variant={alert.variant}>{alert.message}</Alert> : null}
             </Container>
         )
     }
 }
+
+export default withRouter(Dashboard);

@@ -4,10 +4,10 @@ import { Badge, Col, ListGroup, ListGroupItem, ProgressBar, Row } from 'react-bo
 
 interface IProps {
     processing: Record<string, TranscodeStatus>
+    onOpen?: (id: string) => void
 }
 
-export default class PipelineView extends Component<IProps> {
-    
+export default class PipelineView extends Component<IProps> { 
 
     render() {
         function renderBadge(state: TranscodeState) {
@@ -27,10 +27,13 @@ export default class PipelineView extends Component<IProps> {
         return(
             <ListGroup>
                 {Object.keys(processing).map(id => 
-                    <ListGroupItem as={Row}>
+                    <ListGroupItem as={Row} onDoubleClick={() => {
+                        if (this.props.onOpen) {
+                            this.props.onOpen(id);
+                        }
+                    }}>
                         <Col xs={4}>{id} {renderBadge(processing[id].state)}</Col>
-                        <Col xs={8}><ProgressBar now={processing[id].percent * 100} label={`${(processing[id].percent * 100).toFixed(2)}%`}/></Col>
-                        {processing[id].eta !== undefined ? `Time Remaining: ${processing[id].eta}` : null}
+                        <Col md='auto'><ProgressBar now={processing[id].percent * 100} label={`${(processing[id].percent * 100).toFixed(2)}%`}/></Col>
                     </ListGroupItem>)}
             </ListGroup>
         )
