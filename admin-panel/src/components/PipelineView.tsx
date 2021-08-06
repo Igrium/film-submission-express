@@ -29,7 +29,7 @@ export default class PipelineView extends Component<IProps> {
                 {Object.keys(processing).map(id => 
                     <ListGroupItem as={Row}>
                         <Col xs={4}>{id} {renderBadge(processing[id].state)}</Col>
-                        <Col xs={8}><ProgressBar now={processing[id].percent * 100} label={`${processing[id].percent * 100}%`}/></Col>
+                        <Col xs={8}><ProgressBar now={processing[id].percent * 100} label={`${(processing[id].percent * 100).toFixed(2)}%`}/></Col>
                         {processing[id].eta !== undefined ? `Time Remaining: ${processing[id].eta}` : null}
                     </ListGroupItem>)}
             </ListGroup>
