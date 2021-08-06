@@ -1,9 +1,9 @@
 import { Component } from 'react'
-import { Container, Row, Col } from 'react-bootstrap'
 import { Route, BrowserRouter as Router, Switch } from 'react-router-dom'
 import '../css/dashboard.css'
 import Navbar from '../components/Navbar'
 import Submissions from './Submissions'
+import Dashboard from './Dashboard'
 
 export default class Panel extends Component {
     render() {
@@ -19,7 +19,7 @@ export default class Panel extends Component {
                             <Submissions />
                         </Route>
                         <Route path='/'>
-                            Home
+                            <Dashboard />
                         </Route>
                     </Switch>
                 </div>

@@ -6,6 +6,7 @@ import { FilmInfo, UploadState } from "../../../shared/dist/meta.js";
 import path from "path";
 import fs from "fs";
 import { initFilmAPI } from "./films.js";
+import pipelineAPI from "./pipelineAPI";
 
 /**
  * Init an express app with a playbill.
@@ -17,6 +18,7 @@ export function initAPI(config: Config, playbill: PlayBill, app: Router) {
     app.use(json());
 
     app.use('/api/films', initFilmAPI(config, playbill))
+    app.use('/api/pipeline', pipelineAPI(config, playbill));
 
     app.get('/api/media', (req, res) => {
         const id = req.query.id as string;
