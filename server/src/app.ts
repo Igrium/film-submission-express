@@ -22,7 +22,7 @@ async function start() {
     playbill = new PlayBill(await loadDB(config), config.data_folder);
     processor = new VideoProcessor(config, playbill);
 
-    initAPI(config, playbill, app);
+    app.use('/', initAPI(config, playbill));
 
     app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
     app.use('/admin', express.static(path.join(__dirname, '../../admin-panel/build/')));

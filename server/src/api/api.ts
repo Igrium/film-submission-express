@@ -6,19 +6,31 @@ import { FilmInfo, UploadState } from "../../../shared/dist/meta.js";
 import path from "path";
 import fs from "fs";
 import { initFilmAPI } from "./films.js";
+import session from "express-session";
+import passport from "passport";
 
 /**
  * Init an express app with a playbill.
  * @param config Server configuration.
  * @param playbill Active playbill.
- * @param app Express app.
  */
-export function initAPI(config: Config, playbill: PlayBill, app: Router) {
-    app.use(json());
+export function initAPI(config: Config, playbill: PlayBill) {
+    const router = Router();
 
-    app.use('/api/films', initFilmAPI(config, playbill))
+    
+    const expressSession = session({
+        secret: 'sdjkrfh298a',
+    });
 
-    app.get('/api/media', (req, res) => {
+    router.use(expressSession);
+    router.use(passport.initialize());
+    router.use(passport.session());
+
+    router.use(json());
+    router.use('/api/films', initFilmAPI(config, playbill))
+    
+
+    router.get('/api/media', (req, res) => {
         const id = req.query.id as string;
         if ((typeof id) != 'string') {
             res.status(400).json({message: 'id query param must be a string.'});
@@ -41,5 +53,6 @@ export function initAPI(config: Config, playbill: PlayBill, app: Router) {
 
     })
 
-    initUploadAPI(config, playbill, app);
+    initUploadAPI(config, playbill, router);
+    return router;
 }
