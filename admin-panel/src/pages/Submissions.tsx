@@ -1,7 +1,6 @@
-import { ApprovalState, FilmInfo } from 'fse-shared/dist/meta';
+import { FilmInfo } from 'fse-shared/dist/meta';
 import { Component } from 'react';
 import { Alert, Button, Container, Modal } from 'react-bootstrap';
-import App from '../App';
 import SubmissionEditor from '../components/SubmissionEditor';
 import SubmissionTable from '../components/SubmissionTable';
 import { api } from '../logic/api';

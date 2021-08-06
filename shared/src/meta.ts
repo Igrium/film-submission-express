@@ -23,6 +23,22 @@ export enum UploadState {
     Ready
 }
 
+export enum TranscodeState {
+    Queued,
+    Transcoding,
+    Error,
+    Finished
+}
+
+export interface TranscodeStatus {
+    /**
+     * Value from 0-1 representing how much of the transcode is complete.
+     */
+    percent: number
+    state: TranscodeState
+    eta?: string
+}
+
 /**
  * Basic metadata of a film.
  */

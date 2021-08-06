@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { FilmInfo } from 'fse-shared/src/meta';
+import { FilmInfo, TranscodeStatus } from 'fse-shared/src/meta';
 
 /**
  * Handles interfacing with the FSE central API.
@@ -9,7 +9,7 @@ export module api {
 
     export async function getFilms() {
         const response = await client.get('/api/films')
-        if (response.status != 200) {
+        if (response.status !== 200) {
             console.error(response.data);
             throw new Error(`HTTP request returned code ${response.status} (${response.statusText})`);
         }
@@ -30,4 +30,14 @@ export module api {
             throw new Error(`Delete request returned code ${response.status} (${response.statusText})`);
         }
     }
+
+    export async function getProcessingFilms() {
+        const response = await client.get('/api/pipeline/processing');
+        if (response.status >= 400) {
+            throw new Error(`HTTP request returned code ${response.status} (${response.statusText})`);
+        }
+        return response.data as Record<string, TranscodeStatus>
+    }
 }
+
+export default api;

@@ -8,6 +8,7 @@ import fs from "fs";
 import { initFilmAPI } from "./films.js";
 import session from "express-session";
 import passport from "passport";
+import pipelineAPI from "./pipelineAPI";
 
 /**
  * Init an express app with a playbill.
@@ -27,8 +28,8 @@ export function initAPI(config: Config, playbill: PlayBill) {
     router.use(passport.session());
 
     router.use(json());
-    router.use('/api/films', initFilmAPI(config, playbill))
-    
+    router.use('/api/films', initFilmAPI(config, playbill));
+    router.use('/api/pipeline', pipelineAPI(config, playbill));
 
     router.get('/api/media', (req, res) => {
         const id = req.query.id as string;
