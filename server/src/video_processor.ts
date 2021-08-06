@@ -61,7 +61,6 @@ export default class VideoProcessor {
             item.callback(err);
             this.advance();
         }).on('progress', progress => {
-            console.log(`Transcode progress: ${progress.percentComplete}, ETA: ${progress.eta}`)
             pipeline.transcodingFilms[item.id] = {
                 percent: progress.percentComplete / 100,
                 state: TranscodeState.Transcoding,
