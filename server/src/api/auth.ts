@@ -89,6 +89,10 @@ namespace auth {
             res.json({ message: 'success' });
         })
 
+        router.get('/me', (req, res) => {
+            res.send(req.user);
+        })
+
         return router;
     }
 
