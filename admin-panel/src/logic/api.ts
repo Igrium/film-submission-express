@@ -7,6 +7,11 @@ import { FilmInfo, TranscodeStatus } from 'fse-shared/src/meta';
 export module api {
     export const client = axios.create({ timeout: 5000 })
 
+    export interface User {
+        username: string,
+        admin: boolean
+    }
+
     export async function getFilms() {
         const response = await client.get('/api/films')
         if (response.status !== 200) {
@@ -38,6 +43,41 @@ export module api {
         }
         return response.data as Record<string, TranscodeStatus>
     }
+    
+    /**
+     * Get the current user.
+     * @returns The current user, or `null` if we're not logged in.
+     */
+    export async function getUser() {
+        try {
+            return (await client.get('/api/users/me')).data as User;
+        } catch (err) {
+            console.error(err);
+            return null;
+        }
+    }
+
+    /**
+     * Attempt to authenticate with the server.
+     * @param username Username to use.
+     * @param password Password to use.
+     * @returns Whether authentication was successful.
+     */
+    export async function login(username: string, password: string) {
+        const creds = { username, password };
+        try {
+            const response = await client.post('/api/users/login', creds, { withCredentials: true } );
+            if (response.status >= 400) {
+                return false;
+            } else {
+                return true;
+            }
+        } catch (error) {
+            console.error(error);
+            return false;
+        }
+    }
+    
 }
 
 export default api;

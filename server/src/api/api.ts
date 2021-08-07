@@ -21,7 +21,7 @@ export function initAPI(config: Config, playbill: PlayBill) {
     const router = Router();
 
     router.use(json());
-    router.use('/api/user', auth.authAPI(userDB));
+    router.use('/api/users', auth.authAPI(userDB));
     router.use('/api/films', initFilmAPI(config, playbill));
     router.use('/api/pipeline', pipelineAPI(config, playbill));
 

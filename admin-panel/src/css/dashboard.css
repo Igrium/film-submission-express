@@ -37,3 +37,13 @@
     margin-right: .5em;
 }
 
+.login-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 80%;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
