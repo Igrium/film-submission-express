@@ -56,11 +56,11 @@ class Submissions extends Component<any, IState> {
 
     handleApplyEdit(info: Partial<FilmInfo>) {
         this.setState({ showEditor: false });
-        api.postFilm(this.state.selected as string, info).catch(error => {
+        api.postFilm(this.state.selected as string, info).then(() => {
+            this.refreshTable();
+        }).catch(error => {
             console.error(error);
             this.setState({ alert: { variant: 'danger', message: `Unable to POST submission! ${error}` } });
-        }).then(() => {
-            this.refreshTable();
         });
     }
 

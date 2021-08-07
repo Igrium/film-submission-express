@@ -9,6 +9,8 @@ import { initFilmAPI } from "./films.js";
 import session from "express-session";
 import passport from "passport";
 import pipelineAPI from "./pipelineAPI";
+import auth from './auth.js';
+import { userDB } from '../app.js';
 
 /**
  * Init an express app with a playbill.
@@ -18,16 +20,8 @@ import pipelineAPI from "./pipelineAPI";
 export function initAPI(config: Config, playbill: PlayBill) {
     const router = Router();
 
-    
-    const expressSession = session({
-        secret: 'sdjkrfh298a',
-    });
-
-    router.use(expressSession);
-    router.use(passport.initialize());
-    router.use(passport.session());
-
     router.use(json());
+    router.use('/api/users', auth.authAPI(userDB));
     router.use('/api/films', initFilmAPI(config, playbill));
     router.use('/api/pipeline', pipelineAPI(config, playbill));
 

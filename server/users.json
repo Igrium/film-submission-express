@@ -1,0 +1,9 @@
+{
+    "users": {
+        "Igrium": {
+            "username": "Igrium",
+            "password": "$2a$10$Ls15ArNie48yhldOkxdF7OYb6ceU4n0WKJv/ooLfg.iw0eOw3.xiO",
+            "admin": true
+        }
+    }
+}

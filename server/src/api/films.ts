@@ -2,6 +2,7 @@ import express, { json } from "express";
 import { FilmInfo } from "fse-shared/dist/meta";
 import { Config } from "../config";
 import PlayBill from "../playbill";
+import auth from './auth';
 
 export function initFilmAPI(config: Config, playbill: PlayBill) {
     const router = express.Router();
@@ -32,7 +33,7 @@ export function initFilmAPI(config: Config, playbill: PlayBill) {
         }
     })
     
-    router.post('/:id', (req, res) => {
+    router.post('/:id', auth.checkCurator, (req, res) => {
         const id = req.params.id;
         if (!(id in playbill.films)) {
             res.status(404).json({message: `Film '${id}' not found. (Submitting new films may only be done from the submission portal.)`});

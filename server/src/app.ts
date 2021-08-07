@@ -7,11 +7,14 @@ import { loadConfigSync } from './config.js';
 import PlayBill, { loadDB } from './playbill.js';
 import VideoProcessor from './video_processor.js';
 import proxy from 'express-http-proxy';
+import { JsonDB } from 'node-json-db';
+import auth from './api/auth.js';
 
 export const config = loadConfigSync();
 export const app = express();
 let playbill: PlayBill;
 export let processor: VideoProcessor;
+export const userDB = new JsonDB('./users.json', true, true);
 
 async function start() {
     if (!fs.existsSync(config.data_folder)) {
@@ -21,7 +24,8 @@ async function start() {
     app.use(cors());
     playbill = new PlayBill(await loadDB(config), config.data_folder);
     processor = new VideoProcessor(config, playbill);
-
+    
+    auth.initAuth(userDB, app);
     app.use('/', initAPI(config, playbill));
 
     app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
