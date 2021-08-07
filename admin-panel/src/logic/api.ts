@@ -77,6 +77,10 @@ export module api {
             return false;
         }
     }
+
+    export async function logout() {
+        return (await client.post('/api/users/logout', { withCredentials: true })).data;
+    }
     
 }
 

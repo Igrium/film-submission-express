@@ -1,13 +1,11 @@
 import { Config } from "../config.js";
 import PlayBill from "../playbill.js";
-import { json, Request, Response, Router } from "express";
+import { json, Router } from "express";
 import { initUploadAPI } from "../upload.js";
-import { FilmInfo, UploadState } from "../../../shared/dist/meta.js";
+import { UploadState } from "../../../shared/dist/meta.js";
 import path from "path";
 import fs from "fs";
 import { initFilmAPI } from "./films.js";
-import session from "express-session";
-import passport from "passport";
 import pipelineAPI from "./pipelineAPI";
 import auth from './auth.js';
 import { userDB } from '../app.js';

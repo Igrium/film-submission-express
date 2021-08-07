@@ -31,7 +31,7 @@ export default function App() {
                             <Route path='/submissions'>
                                 <Submissions />
                             </Route>
-                            <Route path='/'>
+                            <Route path='/' exact>
                                 <Dashboard />
                             </Route>
                         </>

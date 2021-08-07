@@ -11,6 +11,7 @@ namespace auth {
         username: string
         password: string // MAKE SURE TO HASH
         admin: boolean
+        email: string
     }
 
     /**
@@ -59,8 +60,8 @@ namespace auth {
         let router = Router();
 
         router.post('/register', (req, res) => {
-            const { username, password } = req?.body;
-            if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+            const { username, password, email } = req?.body;
+            if (!username || !password || !email || typeof username !== 'string' || typeof password !== 'string' || typeof email !== 'string') {
                 res.status(400).json({ message: "Improper values." });
                 return;
             }
@@ -73,7 +74,8 @@ namespace auth {
             const user: User = {
                 username,
                 password: hashedPassword,
-                admin: false
+                admin: false,
+                email
             }
 
             database.push(`/users/${username}`, user);
@@ -91,6 +93,22 @@ namespace auth {
 
         router.get('/me', (req, res) => {
             res.send(req.user);
+        })
+
+        router.get('/user/:name', checkCurator, (req, res) => {
+            const me = req.user as User;
+            if (!me.admin && req.params.name !== me.username) {
+                res.status(401).json({ message: "Only admins can view other people's accounts." });
+                return;
+            }
+            let path = `/users/${req.params.name}`;
+            if (!database.exists(path)) {
+                res.status(404).json({ message: "User not found." });
+                return;
+            }
+
+            const user = database.getObject<User>(`/users/${req.params.name}`);
+            res.json(user);
         })
 
         return router;
