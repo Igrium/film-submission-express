@@ -13,3 +13,7 @@ export const approvalStateMap = {
     [ApprovalState.Approved]: 'Approved',
     [ApprovalState.Rejected]: 'Rejected'
 }
+export interface AlertState {
+    variant: string,
+    message: string
+}

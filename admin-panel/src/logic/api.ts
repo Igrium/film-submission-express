@@ -9,7 +9,8 @@ export module api {
 
     export interface User {
         username: string,
-        admin: boolean
+        admin: boolean,
+        email: string
     }
 
     export async function getFilms() {
@@ -55,6 +56,19 @@ export module api {
             console.error(err);
             return null;
         }
+    }
+
+    export async function modifyUser(username: string, email: string, admin: boolean) {
+        await client.post(`/api/users/user/${username}`, { email, admin }, { withCredentials: true })
+    }
+
+    /**
+     * Attempt to get information about a user by their username.
+     * Can only get other users if current user is admin.
+     * @param name Username.
+     */
+    export async function getUserByName(name: string) {
+        return (await client.get(`/api/users/user/${name}`)).data as User;
     }
 
     /**

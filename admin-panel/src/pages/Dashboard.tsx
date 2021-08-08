@@ -4,11 +4,7 @@ import { Alert, Card, Container } from 'react-bootstrap';
 import { withRouter } from 'react-router-dom';
 import PipelineView from '../components/PipelineView';
 import api from '../logic/api';
-
-interface AlertState {
-    variant: string,
-    message: string
-}
+import { AlertState } from '../util';
 
 interface IState {
     processing: Record<string, TranscodeStatus>

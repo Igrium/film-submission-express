@@ -8,7 +8,7 @@ import api from '../logic/api';
 export default function Navbar() {
     const context = useContext(FSEContext);
     const history = useHistory();
-
+    
     const logout = () => {
         api.logout();
         history.push('/login');
@@ -26,6 +26,7 @@ export default function Navbar() {
                     </ul>
                 </div>
                 <DropdownButton id="username-button" title={context?.username}>
+                    <Dropdown.Item onClick={() => history.push(`/profile?username=${context?.username}`)}>Profile</Dropdown.Item>
                     <Dropdown.Item onClick={logout}>Log Out</Dropdown.Item>
                 </DropdownButton>
             </Container>

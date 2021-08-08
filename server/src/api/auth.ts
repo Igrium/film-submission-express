@@ -98,7 +98,7 @@ namespace auth {
         router.get('/user/:name', checkCurator, (req, res) => {
             const me = req.user as User;
             if (!me.admin && req.params.name !== me.username) {
-                res.status(401).json({ message: "Only admins can view other people's accounts." });
+                res.status(403).json({ message: "Only admins can view other people's accounts." });
                 return;
             }
             let path = `/users/${req.params.name}`;
@@ -109,6 +109,33 @@ namespace auth {
 
             const user = database.getObject<User>(`/users/${req.params.name}`);
             res.json(user);
+        })
+
+        router.post('/user/:name', checkCurator, (req, res) => {
+            const me = req.user as User;
+            if (!me.admin && req.params.name !== me.username) {
+                res.status(403).json({ message: "Only admins can modify other people's accounts." });
+                return;
+            }
+            const updated = req.body as Partial<User>
+            const path = `/users/${req.params.name}`;
+            if (!database.exists(path)) {
+                return res.status(404).json({ message: "User not found." });
+            }
+            const old = database.getObject<User>(path);
+
+            if ('admin' in updated && updated.admin != old.admin) {
+                if (!me.admin) {
+                    return res.status(403).json({ message: "Only admins can modify user admin states." });
+                }
+                if (me.username === req.params.name) {
+                    return res.status(405).json({ message: "Cannot modify your own admin state." });
+                }
+            }
+
+            database.push(path, { admin: updated.admin, email: updated.email }, false);
+            res.json({ message: 'Success' });
+            console.log(`Updated user: ${old.username}`);
         })
 
         return router;
@@ -127,7 +154,7 @@ namespace auth {
         if (user.admin) {
             next();
         } else {
-            res.status(401).json({ message: "This action is only available to admins."});
+            res.status(403).json({ message: "This action is only available to admins."});
         }
     }
     

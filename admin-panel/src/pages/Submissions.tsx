@@ -5,17 +5,13 @@ import { useLocation, withRouter } from 'react-router-dom';
 import SubmissionEditor from '../components/SubmissionEditor';
 import SubmissionTable from '../components/SubmissionTable';
 import { api } from '../logic/api';
+import { AlertState } from '../util';
 
 interface IState {
     films: Record<string, FilmInfo>
     selected?: string
     showEditor: boolean
     alert?: AlertState
-}
-
-interface AlertState {
-    variant: string,
-    message: string
 }
 
 class Submissions extends Component<any, IState> {

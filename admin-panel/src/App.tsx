@@ -5,16 +5,24 @@ import Navbar from './components/Navbar'
 import Submissions from './pages/Submissions'
 import Dashboard from './pages/Dashboard'
 import { FSEContext } from './Context'
-import api from './logic/api'
 import Login from './pages/Login'
+import Profile from './pages/Profile'
 
 function Header() {
     const location = useLocation();
     return location.pathname !== '/login' ? <Navbar /> : null;
 }
 
+function ProfileView() {
+    const query = new URLSearchParams(useLocation().search);
+    const username = query.get('username')
+    return <Profile username={username ? username : '[undefined]'} />
+}
+
 export default function App() {
     const context = useContext(FSEContext)
+    
+
     return (
         <Router basename='admin'>
             <Header />
@@ -30,6 +38,9 @@ export default function App() {
                             </Route>
                             <Route path='/submissions'>
                                 <Submissions />
+                            </Route>
+                            <Route path='/profile'>
+                                <ProfileView />
                             </Route>
                             <Route path='/' exact>
                                 <Dashboard />

@@ -3,16 +3,12 @@ import { Alert, Button, Card, Col, Container, Form, Row } from 'react-bootstrap'
 import { withRouter } from 'react-router-dom';
 import { FSEContext } from '../Context'
 import api from '../logic/api';
-
-interface Alert {
-    variant: string,
-    message: string
-}
+import { AlertState } from '../util';
 
 interface IState {
     username: string,
     password: string,
-    alert?: Alert
+    alert?: AlertState
 }
 
 class Login extends Component<any, IState> {
