@@ -7,6 +7,7 @@ import Dashboard from './pages/Dashboard'
 import { FSEContext } from './Context'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
+import AccountControl from './pages/AccountControl'
 
 function Header() {
     const location = useLocation();
@@ -41,6 +42,9 @@ export default function App() {
                             </Route>
                             <Route path='/profile'>
                                 <ProfileView />
+                            </Route>
+                            <Route path='/accounts'>
+                                <AccountControl />
                             </Route>
                             <Route path='/' exact>
                                 <Dashboard />

@@ -113,8 +113,7 @@ namespace auth {
 
             const user = database.getObject<User>(`/users/${req.params.name}`);
             // We don't want to send the password.
-            const simpleUser: SimpleUser = { username: user.username, admin: user.admin, email: user.email };
-            res.json(simpleUser);
+            res.json(redactUser(user));
         })
 
         router.post('/user/:name', checkCurator, (req, res) => {
@@ -139,11 +138,6 @@ namespace auth {
                 }
             }
 
-            let newPassword = undefined;
-            if (updated.password) {
-
-            }
-
             const n = {
                 admin: updated.admin,
                 email: updated.email,
@@ -153,6 +147,19 @@ namespace auth {
             database.push(path, mergeObject(old, n));
             res.json({ message: 'Success' });
             console.log(`Updated user: ${old.username}`);
+        })
+
+        router.get('/all', checkAdmin, (req, res) => {
+            res.json(Object.keys(database.getData('/users')));
+        })
+
+        router.get('/all-data', checkAdmin, (req, res) => {
+            const users = database.getObject<Record<string, User>>('/users');
+            const simpleUsers: Record<string, SimpleUser> = {};
+            Object.keys(users).forEach(name => {
+                simpleUsers[name] = redactUser(users[name]);
+            })
+            res.json(simpleUsers);
         })
 
         return router;
@@ -193,6 +200,10 @@ namespace auth {
         } else {
             res.status(401).json({ message: "You're not logged in." });
         }
+    }
+
+    export function redactUser(user: User): SimpleUser {
+        return { username: user.username, email: user.email, admin: user.admin };
     }
 }
 

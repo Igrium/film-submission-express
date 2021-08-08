@@ -81,7 +81,6 @@ class Submissions extends Component<any, IState> {
         const { films, selected, showEditor, alert } = this.state;
         return (
             <Container>
-                <br />
                 <SubmissionTable films={films} selectable caption='All submissions' onSelect={this.handleSelect}
                 selection={selected} />
                 <Button onClick={() => this.refreshTable()} className='mr-1'>

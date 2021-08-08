@@ -15,17 +15,22 @@ export default function Navbar() {
     }
 
     return (
-        <Nav className='navbar navbar-expand-lg navbar-dark bg-dark'>
+        <Nav className='navbar navbar-expand-lg navbar-dark bg-dark mb-4'>
             <Container>
                 <Link className='navbar-brand' to='/'>FSE Dashboard</Link>
                 <div className='collapse, navbar-collapse' id='navbarColor01'>
                     <ul className='navbar-nav'>
-                        <li className='nav-item'>
+                        <li className='nav-item' key='submissions'>
                             <Link className='nav-link' to='submissions'>Submissions</Link>
                         </li>
+                        { context?.admin ? (
+                            <li className='nav-item' key='accounts'>
+                                <Link className='nav-link' to='accounts'>Accounts</Link>
+                            </li>
+                        ) : null }
                     </ul>
                 </div>
-                <DropdownButton id="username-button" title={context?.username}>
+                <DropdownButton id="username-button" title={context?.username ? context.username : ''}>
                     <Dropdown.Item onClick={() => history.push(`/profile?username=${context?.username}`)}>Profile</Dropdown.Item>
                     <Dropdown.Item onClick={logout}>Log Out</Dropdown.Item>
                 </DropdownButton>

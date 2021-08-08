@@ -1,7 +1,6 @@
 import { SimpleUser, UserWithPassword } from 'fse-shared/src/users';
 import React, { Component } from 'react'
 import { Button, Col, Form, Row } from 'react-bootstrap';
-import api from '../logic/api'
 
 interface IProps {
     initial?: SimpleUser,
@@ -38,9 +37,9 @@ export default class ProfileEditor extends Component<IProps, IState> {
                 <Form onSubmit={(event) => {
                     event.preventDefault();
                     if (onSave) onSave({
-                        username: allowNameChange ? username : undefined,
+                        username,
                         email,
-                        admin: allowAdminChange ? admin : undefined
+                        admin
                     })
                 }}>
                     <Form.Group as={Row} className='mb-3'>
@@ -54,7 +53,7 @@ export default class ProfileEditor extends Component<IProps, IState> {
                             } /></Col>
                     </Form.Group>
                     <Form.Group as={Row} className='mb-3'>
-                        <Col sm={5}><Form.Check type='checkbox' label='Admin' checked={admin} 
+                        <Col sm={5}><Form.Check type='checkbox' label='Admin' checked={admin}
                             disabled={!allowAdminChange} onChange={event => {
                             this.setState({ admin: event.target.checked });
                         }} /></Col>   

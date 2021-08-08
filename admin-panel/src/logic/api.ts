@@ -91,6 +91,19 @@ export module api {
         return (await client.post('/api/users/logout', { withCredentials: true })).data;
     }
     
+    /**
+     * Get the names of all the users in the database.
+     * Only works if current user is admin.
+     * @returns All the usernames in the database.
+     */
+    export async function getAllUsers() {
+        return (await client.get('/api/users/all', { withCredentials: true })).data as string[];
+    }
+
+    export async function getAllUserData() {
+        return (await client.get('/api/users/all-data', { withCredentials: true })).data as Record<string, SimpleUser>;
+    }
+    
 }
 
 export default api;

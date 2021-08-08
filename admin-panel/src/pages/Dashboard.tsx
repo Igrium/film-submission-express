@@ -56,7 +56,6 @@ class Dashboard extends Component<any, IState> {
 
         return (
             <Container>
-                <br />
                 <Card>
                     <Card.Header>Pipeline</Card.Header>
                     <Card.Body>
