@@ -58,7 +58,7 @@ export module api {
         }
     }
 
-    export async function modifyUser(username: string, email: string, admin: boolean) {
+    export async function modifyUser(username: string, email: string | undefined, admin: boolean | undefined) {
         await client.post(`/api/users/user/${username}`, { email, admin }, { withCredentials: true })
     }
 

@@ -133,7 +133,9 @@ namespace auth {
                 }
             }
 
-            database.push(path, { admin: updated.admin, email: updated.email }, false);
+            const n = { admin: 'admin' in updated ? updated.admin : old.admin, email: updated.email ? updated.email : old.email };
+
+            database.push(path, {...old, ...n});
             res.json({ message: 'Success' });
             console.log(`Updated user: ${old.username}`);
         })

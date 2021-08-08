@@ -59,7 +59,7 @@ export function initFilmAPI(config: Config, playbill: PlayBill) {
         res.end();
     })
 
-    router.delete('/:id', (req, res) => {
+    router.delete('/:id', auth.checkCurator, (req, res) => {
         const id = req.params.id;
         if (!(id in playbill.films)) {
             res.status(404).json({message: `Film ${id} not found.`});
