@@ -1,12 +1,13 @@
+import { SimpleUser, UserWithPassword } from 'fse-shared/src/users';
 import React, { Component } from 'react'
 import { Button, Col, Form, Row } from 'react-bootstrap';
 import api from '../logic/api'
 
 interface IProps {
-    initial?: api.User,
+    initial?: SimpleUser,
     allowNameChange?: boolean,
     allowAdminChange?: boolean,
-    onSave?: (user: Partial<api.User>) => void
+    onSave?: (user: Partial<UserWithPassword>) => void
 }
 
 interface IState {

@@ -1,17 +1,12 @@
 import axios from 'axios';
 import { FilmInfo, TranscodeStatus } from 'fse-shared/src/meta';
+import { SimpleUser, UserWithPassword } from 'fse-shared/src/users';
 
 /**
  * Handles interfacing with the FSE central API.
  */
 export module api {
     export const client = axios.create({ timeout: 5000 })
-
-    export interface User {
-        username: string,
-        admin: boolean,
-        email: string
-    }
 
     export async function getFilms() {
         const response = await client.get('/api/films')
@@ -51,15 +46,15 @@ export module api {
      */
     export async function getUser() {
         try {
-            return (await client.get('/api/users/me')).data as User;
+            return (await client.get('/api/users/me')).data as SimpleUser;
         } catch (err) {
             console.error(err);
             return null;
         }
     }
 
-    export async function modifyUser(username: string, email: string | undefined, admin: boolean | undefined) {
-        await client.post(`/api/users/user/${username}`, { email, admin }, { withCredentials: true })
+    export async function modifyUser(username: string, user: Partial<UserWithPassword>) {
+        await client.post(`/api/users/user/${username}`, user, { withCredentials: true })
     }
 
     /**
@@ -68,7 +63,7 @@ export module api {
      * @param name Username.
      */
     export async function getUserByName(name: string) {
-        return (await client.get(`/api/users/user/${name}`)).data as User;
+        return (await client.get(`/api/users/user/${name}`)).data as SimpleUser;
     }
 
     /**

@@ -1,3 +1,4 @@
+import { SimpleUser, UserWithPassword } from 'fse-shared/src/users'
 import React, { Component } from 'react'
 import { Alert, Col, Container, Form, Row, Button } from 'react-bootstrap'
 import ProfileEditor from '../components/ProfileEditor'
@@ -12,8 +13,8 @@ interface IProps {
 interface IState {
     alert?: AlertState,
     selfAdmin: boolean,
-    selfName: string
-    initial?: api.User
+    selfName: string,
+    initial?: SimpleUser
 }
 
 export default class Profile extends Component<IProps, IState> {
@@ -40,8 +41,8 @@ export default class Profile extends Component<IProps, IState> {
         this.setState({ selfAdmin: this.context.admin, selfName: this.context.username });
     }
 
-    save = (user: Partial<api.User>) => {
-        api.modifyUser(this.props.username, user.email, user.admin).then(() => {
+    save = (user: Partial<UserWithPassword>) => {
+        api.modifyUser(this.props.username, user).then(() => {
             this.setState({ alert: { variant: 'success', message: "Updated user profile." } });
         }).catch(error => {
             this.setState({ alert: { variant: 'danger', message: `Failed to update user: ${error}` } });

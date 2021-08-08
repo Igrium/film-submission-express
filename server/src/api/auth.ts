@@ -5,13 +5,14 @@ import { JsonDB } from 'node-json-db';
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
+import { SimpleUser, UserWithPassword } from 'fse-shared/dist/users'
 
 namespace auth {
-    export interface User {
-        username: string
+    /**
+     * Represends a user with a hashed password.
+     */
+    export interface User extends SimpleUser {
         password: string // MAKE SURE TO HASH
-        admin: boolean
-        email: string
     }
 
     /**
@@ -60,10 +61,13 @@ namespace auth {
         let router = Router();
 
         router.post('/register', (req, res) => {
-            const { username, password, email } = req?.body;
+            let { username, password, email, admin } = req?.body as Partial<UserWithPassword>;
             if (!username || !password || !email || typeof username !== 'string' || typeof password !== 'string' || typeof email !== 'string') {
                 res.status(400).json({ message: "Improper values." });
                 return;
+            }
+            if (typeof admin !== 'boolean') {
+                admin = false;
             }
 
             if (database.exists(`/users/${username}`)) {
@@ -74,7 +78,7 @@ namespace auth {
             const user: User = {
                 username,
                 password: hashedPassword,
-                admin: false,
+                admin,
                 email
             }
 
@@ -108,7 +112,9 @@ namespace auth {
             }
 
             const user = database.getObject<User>(`/users/${req.params.name}`);
-            res.json(user);
+            // We don't want to send the password.
+            const simpleUser: SimpleUser = { username: user.username, admin: user.admin, email: user.email };
+            res.json(simpleUser);
         })
 
         router.post('/user/:name', checkCurator, (req, res) => {
@@ -117,7 +123,7 @@ namespace auth {
                 res.status(403).json({ message: "Only admins can modify other people's accounts." });
                 return;
             }
-            const updated = req.body as Partial<User>
+            const updated = req.body as Partial<UserWithPassword>
             const path = `/users/${req.params.name}`;
             if (!database.exists(path)) {
                 return res.status(404).json({ message: "User not found." });
@@ -133,14 +139,31 @@ namespace auth {
                 }
             }
 
-            const n = { admin: 'admin' in updated ? updated.admin : old.admin, email: updated.email ? updated.email : old.email };
+            let newPassword = undefined;
+            if (updated.password) {
 
-            database.push(path, {...old, ...n});
+            }
+
+            const n = {
+                admin: updated.admin,
+                email: updated.email,
+                password: updated.password ? bcrypt.hashSync(updated.password, 10) : undefined 
+            };
+
+            database.push(path, mergeObject(old, n));
             res.json({ message: 'Success' });
             console.log(`Updated user: ${old.username}`);
         })
 
         return router;
+    }
+    
+    const mergeObject = (a: any, b: any) => {
+        let res = {} as any;
+        Object.keys({...a, ...b}).map(key => {
+            res[key] = b[key] || a[key];
+        })
+        return res;
     }
 
     /**
@@ -174,37 +197,3 @@ namespace auth {
 }
 
 export default auth;
-
-// function initAuth() {
-//     const db = new JsonDB('./users', true, true);
-
-//     passport.use(new LocalStrategy(
-//         {
-//             usernameField: "username",
-//             passwordField: "password"
-//         },
-//         function (username, password, done) {
-//             let user = db.getObject<User>(`/${username}`)
-//             if (!user) {
-//                 return done(null, false, { message: 'User does not exist.' });
-//             }
-
-//             if (password !== user.password) {
-//                 return done(null, false, { message: 'Invalid password.'});
-//             }
-
-//             return done(null, true);
-//         }
-//     ));
-
-//     passport.serializeUser((user, done) => {
-//     });
-//     passport.deserializeUser(function (user, done) {
-//         done(null, db.getObject<User>(`/${user}`))
-//     });
-
-//     const router = Router();
-//     router.post('/login', passport.authenticate('local'), function(req, res) {
-//         res.json(req.user);
-//     })
-// }
