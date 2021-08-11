@@ -92,6 +92,7 @@ namespace auth {
 
         router.post('/login', passport.authenticate('local'), (req, res) => {
             res.json({ message: 'authenticated' });
+            console.log(`${(req.user as SimpleUser).username} logged in from ${req.ip}`);
         })
 
         router.post('/logout', (req, res) => {

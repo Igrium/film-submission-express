@@ -1,8 +1,8 @@
-import './css/bootstrap.css';
-import './css/playback-client.css'
+import './frontend/css/bootstrap.css';
+import './frontend/css/playback-client.css'
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
-import Login from './pages/Login';
+import Login from './frontend/pages/Login';
 
 export default function App() {
     const [loggedIn, setLoggedIn] = useState(false);
