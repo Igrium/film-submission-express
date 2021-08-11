@@ -6,15 +6,19 @@ import { initAPI } from './api/api.js';
 import { loadConfigSync } from './config.js';
 import PlayBill, { loadDB } from './playbill.js';
 import VideoProcessor from './video_processor.js';
-import proxy from 'express-http-proxy';
 import { JsonDB } from 'node-json-db';
 import auth from './api/auth.js';
+import { createServer } from 'http'
+import PlaybackServer from './playback/playback_server.js';
 
 export const config = loadConfigSync();
 export const app = express();
+export const http = createServer(app);
+
 let playbill: PlayBill;
 export let processor: VideoProcessor;
 export const userDB = new JsonDB('./users.json', true, true);
+export let playbackServer: PlaybackServer;
 
 async function start() {
     if (!fs.existsSync(config.data_folder)) {
@@ -31,7 +35,9 @@ async function start() {
     app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
     app.use('/admin', express.static(path.join(__dirname, '../../admin-panel/build/')));
 
-    app.listen(config.port, () => {
+    playbackServer = new PlaybackServer(http);
+
+    http.listen(config.port, () => {
         console.log(`Film Sumbission server started on port ${config.port}.`)
     });
 }

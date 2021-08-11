@@ -16,18 +16,22 @@ namespace auth {
     }
 
     /**
+     * The active session information.
+     */
+    export const sessionMiddleware = session({
+        secret: 'secretcode',
+        resave: true,
+        saveUninitialized: true
+    })
+
+    /**
      * Initialize authorization API.
      * @param database User database.
      * @param router Router to init on.
      */
     export function initAuth(database: JsonDB, router: Router) {
-        router.use(
-            session({
-                secret: 'secretcode',
-                resave: true,
-                saveUninitialized: true
-            })
-        )
+        router.use(sessionMiddleware)
+
         router.use(cookieParser());
         router.use(passport.initialize());
         router.use(passport.session());
