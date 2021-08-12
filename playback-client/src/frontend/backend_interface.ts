@@ -1,9 +1,8 @@
-import { IpcRenderer } from 'electron';
-import { Creds } from '../util';
+import { BackendAPI, Creds } from '../util';
 import { EventEmitter } from 'events';
-const ipcRenderer: IpcRenderer = (window as any).ipcRenderer
+const api: BackendAPI = (window as any).backendAPI;
 
-console.log(ipcRenderer)
+console.log(api)
 module backendInterface {
     export const emitter = new EventEmitter
 
@@ -14,7 +13,7 @@ module backendInterface {
      */
     export function login(credentials: Creds) {
         return new Promise<void>((resolve, reject) => {
-            ipcRenderer.invoke('login', credentials).then((err) => {
+            api.invoke('login', credentials).then((err) => {
                 if (err) {
                     reject(err);
                 } else {
@@ -29,7 +28,7 @@ module backendInterface {
      * @returns The current credentials, or `null` if we're not logged in.
      */
     export async function getCredentials() {
-        let creds = await ipcRenderer.invoke('getCredentials') as Creds | null;
+        let creds = await api.invoke('getCredentials') as Creds | null;
         return creds;
     }
 
@@ -37,11 +36,11 @@ module backendInterface {
      * Tell the backend to launch the media player.
      */
     export function launchMediaPlayer() {
-        ipcRenderer.send('launchMediaPlayer');
+        api.send('launchMediaPlayer');
     }
     
     export function loadVideoFile(url: string) {
-        ipcRenderer.send('loadVideoFile', url);
+        api.send('loadVideoFile', url);
     }
 
     export function onMediaFinished(listener: () => void) {
@@ -56,17 +55,18 @@ module backendInterface {
         emitter.on('mediaTimeUpdate', listener);
     }
 
-    // ipcRenderer.on('mediaFinished', () => {
-    //     emitter.emit('mediaFinished');
-    // });
+    api.on('mediaFinished', () => {
+        emitter.emit('mediaFinished');
+    });
 
-    // ipcRenderer.on('mediaDurationChange', (event, duration) => {
-    //     emitter.emit('mediaDurationChange', duration);
-    // });
+    api.on('mediaDurationChange', (duration) => {
+        emitter.emit('mediaDurationChange', duration);
+    });
 
-    // ipcRenderer.on('mediaTimeUpdate', (event, time) => {
-    //     emitter.emit('mediaTimeUpdate', time);
-    // });
+    api.on('mediaTimeUpdate', (time) => {
+        console.log(`Time: ${time}`)
+        emitter.emit('mediaTimeUpdate', time);
+    });
 }
 
 export default backendInterface;
