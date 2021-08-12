@@ -22,7 +22,7 @@ export default class Login extends Component<IProps, IState> {
         super(props)
     
         this.state = {
-            address: 'https://',
+            address: 'http://',
             username: '',
             password: '',
             validated: false

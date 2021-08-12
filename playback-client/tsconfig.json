@@ -11,6 +11,8 @@
     "moduleResolution": "node",
     "resolveJsonModule": true,
     "jsx": "react",
+    "target": "ES6",
+    "strictNullChecks": true,
     "paths": {
       "*": ["node_modules/*"]
     }

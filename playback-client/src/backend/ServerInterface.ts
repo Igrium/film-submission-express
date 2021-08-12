@@ -7,26 +7,36 @@ import axios from 'axios';
  */
 export default class ServerInterface {
     private _socket: Socket
+    private _creds: Creds;
+    private _hostname: string
     static client = axios.create({ timeout: 5000 });
 
-    /**
-     * The hostname of the server we're connected to.
-     */
-    public hostname: string
-
-    constructor(socket: Socket, hostname: string) {
+    constructor(socket: Socket, hostname: string, credentials: Creds) {
         this._socket = socket;
-        this.hostname = hostname;
+        this._hostname = hostname;
+        this._creds = credentials;
     }
     
     /**
      * The socket connection used under the hood.
      */
-    public getSocket() {
+    get socket() {
         return this._socket;
     }
     
+    /**
+     * The credentials used to log into the server.
+     */
+    get credentials() {
+        return this._creds;
+    }
 
+    /**
+     * The hostname of the server we're connected to.
+     */
+    get hostname() {
+        return this._hostname;
+    }
 
     /**
      * Attempt to connect to a FSE server.
@@ -61,7 +71,7 @@ export default class ServerInterface {
                 return reject(`Unable to establish socket connection. ${e}`);
             }
 
-            resolve(new ServerInterface(socket, address));
+            resolve(new ServerInterface(socket, address, credentials));
         });
     }
     
