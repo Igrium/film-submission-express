@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import { Button, Col, Container, Form, FormControl, Row } from 'react-bootstrap'
+import { ReplicationModel } from '../../util'
 import backendInterface from '../backend_interface'
 import PlaybackControls from '../components/PlaybackControls'
 
@@ -21,17 +22,14 @@ export default class Controls extends Component<{}, IState> {
     }
     
     componentDidMount() {
-        backendInterface.onMediaTimeUpdate((time) => {
-            this.setState({ mediaTime: time });
-        });
+        backendInterface.onUpdateReplicationData(data => this.updateState(data));
+        this.updateState(backendInterface.replicator.data);
+    }
 
-        backendInterface.onMediaDurationChange((duration) => {
-            this.setState({ mediaDuration: duration });
-        });
-
-        backendInterface.onSetIsPlaying(playing => {
-            this.setState({ playing });
-        })
+    private updateState(data: Partial<ReplicationModel>) {
+        if (data.mediaDuration) this.setState({ mediaDuration: data.mediaDuration });
+        if (data.mediaTime) this.setState({ mediaTime: data.mediaTime });
+        if ('isPlaying' in data) this.setState({ playing: data.isPlaying as boolean });
     }
 
     render() {

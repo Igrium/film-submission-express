@@ -8,6 +8,10 @@ import passport from 'passport';
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
 
+export interface ReplicationModel {
+
+}
+
 /**
  * Manages the interfacing with playback clients.
  */
@@ -47,8 +51,6 @@ export default class PlaybackServer {
         const session = (socket.request as express.Request).session;
         console.log(`Saving sid ${socket.id} in session ${session.id}`);
         (session as any).socketId = socket.id;
-
-
     }
     
     

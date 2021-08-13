@@ -1,9 +1,30 @@
-import { BackendAPI, Creds } from '../util';
+import { BackendAPI, Creds, defaultReplication, ReplicationModel } from '../util';
 import { EventEmitter } from 'events';
+import { Replicator } from 'fse-shared/dist/replication'
 const api: BackendAPI = (window as any).backendAPI;
+
+class IpcReplicator<T extends object> extends Replicator<T> {
+    constructor(data: T) {
+        super(data, false);
+    }
+
+    protected send(data: Partial<T>): void {
+        api.send('replicate', data);
+    }
+    protected listen(callback: (data: Partial<T>) => void) {
+        api.on('replicate', (data) => callback(data));
+    }
+    protected async request(callback: (data: T) => void) {
+        const result: T = await api.invoke('sync')
+        callback(result);
+    }
+
+}
 
 module backendInterface {
     export const emitter = new EventEmitter
+    export const replicator = new IpcReplicator<ReplicationModel>(defaultReplication);
+    replicator.init()
 
     /**
      * Attempt to login to the server.
@@ -21,7 +42,7 @@ module backendInterface {
             }).catch(reject);
         });
     }
-
+    
     /**
      * Get the current login credentials.
      * @returns The current credentials, or `null` if we're not logged in.
@@ -30,6 +51,7 @@ module backendInterface {
         let creds = await api.invoke('getCredentials') as Creds | null;
         return creds;
     }
+
 
     /**
      * Tell the backend to launch the media player.
@@ -50,18 +72,10 @@ module backendInterface {
         api.on('mediaFinished', listener);
     }
 
-    export function onMediaDurationChange(listener: (duration: number) => void) {
-        api.on('mediaDurationChange', listener)
+    export function onUpdateReplicationData(listener: (data: Partial<ReplicationModel>) => void) {
+        replicator.onUpdate(listener);
     }
-
-    export function onMediaTimeUpdate(listener: (time: number) => void) {
-        emitter.on('mediaTimeUpdate', listener);
-        api.on('mediaTimeUpdate', listener);
-    }
-
-    export function onSetIsPlaying(listener: (isPlaying: boolean) => void) {
-        api.on('setIsPlaying', listener);
-    }
+    
 }
 
 export default backendInterface;

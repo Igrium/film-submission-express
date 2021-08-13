@@ -25,7 +25,7 @@ const createWindow = (): void => {
   });
 
   mainWindow.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-  backend.mainWindow = mainWindow;
+  backend.init(mainWindow);
   mainWindow.on('closed', () => app.quit());
 };
 

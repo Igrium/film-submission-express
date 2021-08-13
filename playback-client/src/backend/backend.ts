@@ -1,13 +1,48 @@
 import { BrowserWindow, ipcMain } from 'electron';
-import { Creds } from '../util';
+import { Creds, defaultReplication, ReplicationModel } from '../util';
 import MediaPlayer from './MediaPlayer';
 import ServerInterface from './ServerInterface';
-import url from 'url';
+import { Replicator } from 'fse-shared/dist/replication';
 
 module backend {
     export let server: ServerInterface | null = null;
     export let mainWindow: BrowserWindow;
     export let mediaPlayer: MediaPlayer | null = null;
+    export let replicator: Replicator<ReplicationModel>
+
+    class IpcReplicator<T extends object> extends Replicator<T> {
+
+        public readonly window: BrowserWindow;
+
+        constructor(data: T, window: BrowserWindow) {
+            super(data, true);
+            this.window = window;
+        }
+
+        init() {
+            super.init();
+            ipcMain.handle('sync', () => {
+                return this.data;
+            })
+        }
+        
+        protected send(data: Partial<T>): void {
+            this.window.webContents.send('replicate', data);
+        }
+        protected listen(callback: (data: Partial<T>) => void): void {
+            ipcMain.on('replicate', (event, data) => callback(data));
+        }
+        protected request(callback: (data: T) => void): void {
+            throw new Error('Method not implemented.');
+        }
+        
+    }
+
+    export function init(window: BrowserWindow) {
+        mainWindow = window;
+        replicator = new IpcReplicator(defaultReplication, window);
+        replicator.init();
+    }
 
     export function launchMediaPlayer() {
         if (mediaPlayer === null) {
@@ -21,15 +56,15 @@ module backend {
             });
 
             mediaPlayer.onDurationChange((duration) => {
-                mainWindow.webContents.send('mediaDurationChange', duration);
+                replicator.setData({ mediaDuration: duration })
             });
 
             mediaPlayer.onTimeUpdate((time) => {
-                mainWindow.webContents.send('mediaTimeUpdate', time);
+                replicator.setData({ mediaTime: time });
             });
 
             mediaPlayer.onSetIsPlaying((playing) => {
-                mainWindow.webContents.send('setIsPlaying', playing);
+                replicator.setData({ isPlaying: playing });
             })
         }
     }

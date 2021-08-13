@@ -5,11 +5,12 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "rimraf ./build && tsc"
+    "build": "tsc"
   },
   "author": "Igrium",
   "license": "GPL-3.0-or-later",
   "devDependencies": {
+    "@types/node": "^16.6.1",
     "rimraf": "^3.0.2",
     "typescript": "^4.3.5"
   }
