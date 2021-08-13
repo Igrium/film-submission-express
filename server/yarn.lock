@@ -56,6 +56,13 @@
   resolved "https://registry.npmjs.org/@types/cors/-/cors-2.8.12.tgz"
   integrity sha512-vt+kDhq/M2ayberEtJcIN/hxXy1Pk+59g2FV/ZQceeaTyCtCucjL2Q7FXlFjtWn4n15KCr1NE2lNNFhp0lEThw==
 
+"@types/engine.io@*":
+  version "3.1.7"
+  resolved "https://registry.yarnpkg.com/@types/engine.io/-/engine.io-3.1.7.tgz#86e541a5dc52fb7e97735383564a6ae4cfe2e8f5"
+  integrity sha512-qNjVXcrp+1sS8YpRUa714r0pgzOwESdW5UjHL7D/2ZFdBX0BXUXtg1LUrp+ylvqbvMcMWUy73YpRoxPN2VoKAQ==
+  dependencies:
+    "@types/node" "*"
+
 "@types/express-http-proxy@^1.6.2":
   version "1.6.2"
   resolved "https://registry.npmjs.org/@types/express-http-proxy/-/express-http-proxy-1.6.2.tgz"
@@ -72,7 +79,7 @@
     "@types/qs" "*"
     "@types/range-parser" "*"
 
-"@types/express-session@^1.17.4":
+"@types/express-session@*", "@types/express-session@^1.17.4":
   version "1.17.4"
   resolved "https://registry.npmjs.org/@types/express-session/-/express-session-1.17.4.tgz"
   integrity sha512-7cNlSI8+oOBUHTfPXMwDxF/Lchx5aJ3ho7+p9jJZYVg9dVDJFh3qdMXmJtRsysnvS+C6x46k9DRYmrmCkE+MVg==
@@ -135,6 +142,16 @@
     "@types/express" "*"
     "@types/passport" "*"
 
+"@types/passport.socketio@^3.7.6":
+  version "3.7.6"
+  resolved "https://registry.yarnpkg.com/@types/passport.socketio/-/passport.socketio-3.7.6.tgz#c509c377f5d77e83246259759a55bfd46d2a560f"
+  integrity sha512-fygabKXw+x4zPWGMFKyJoTxbmHFz3gNM6kpelLaIJUD9qj455ZfnVPwmTBsKCXxzxKdCxleraJAprz6Q8+EB8Q==
+  dependencies:
+    "@types/express" "*"
+    "@types/express-session" "*"
+    "@types/passport" "*"
+    "@types/socket.io" "2.1.13"
+
 "@types/passport@*", "@types/passport@^1.0.7":
   version "1.0.7"
   resolved "https://registry.npmjs.org/@types/passport/-/passport-1.0.7.tgz"
@@ -159,6 +176,22 @@
   dependencies:
     "@types/mime" "^1"
     "@types/node" "*"
+
+"@types/socket.io-parser@*":
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/@types/socket.io-parser/-/socket.io-parser-3.0.0.tgz#9726d3ab9235757a0a30dd5ccf8975dce54e5e2c"
+  integrity sha512-Ry/rbTE6HQNL9eu3LpL1Ocup5VexXu1bSSGlSho/IR5LuRc8YvxwSNJ3JxqTltVJEATLbZkMQETSbxfKNgp4Ew==
+  dependencies:
+    socket.io-parser "*"
+
+"@types/socket.io@2.1.13":
+  version "2.1.13"
+  resolved "https://registry.yarnpkg.com/@types/socket.io/-/socket.io-2.1.13.tgz#b6d694234e99956c96ff99e197eda824b6f9dc48"
+  integrity sha512-JRgH3nCgsWel4OPANkhH8TelpXvacAJ9VeryjuqCDiaVDMpLysd6sbt0dr6Z15pqH3p2YpOT3T1C5vQ+O/7uyg==
+  dependencies:
+    "@types/engine.io" "*"
+    "@types/node" "*"
+    "@types/socket.io-parser" "*"
 
 abbrev@1:
   version "1.1.1"
@@ -1385,6 +1418,13 @@ passport-strategy@1.x.x:
   resolved "https://registry.npmjs.org/passport-strategy/-/passport-strategy-1.0.0.tgz"
   integrity sha1-tVOaqPwiWj0a0XlHbd8ja0QPUuQ=
 
+passport.socketio@^3.7.0:
+  version "3.7.0"
+  resolved "https://registry.yarnpkg.com/passport.socketio/-/passport.socketio-3.7.0.tgz#2ee5fafe9695d4281c8cddd3fe975ecd18e6726e"
+  integrity sha1-LuX6/paV1CgcjN3T/pdezRjmcm4=
+  dependencies:
+    xtend "^4.0.0"
+
 passport@^0.4.1:
   version "0.4.1"
   resolved "https://registry.npmjs.org/passport/-/passport-0.4.1.tgz"
@@ -1669,7 +1709,7 @@ socket.io-adapter@~2.3.1:
   resolved "https://registry.npmjs.org/socket.io-adapter/-/socket.io-adapter-2.3.1.tgz"
   integrity sha512-8cVkRxI8Nt2wadkY6u60Y4rpW3ejA1rxgcK2JuyIhmF+RMNpTy1QRtkHIDUOf3B4HlQwakMsWbKftMv/71VMmw==
 
-socket.io-parser@~4.0.4:
+socket.io-parser@*, socket.io-parser@~4.0.4:
   version "4.0.4"
   resolved "https://registry.npmjs.org/socket.io-parser/-/socket.io-parser-4.0.4.tgz"
   integrity sha512-t+b0SS+IxG7Rxzda2EVvyBZbvFPBCjJoyHuE0P//7OAsN23GItzDRdWa6ALxZI/8R5ygK7jAR6t028/z+7295g==

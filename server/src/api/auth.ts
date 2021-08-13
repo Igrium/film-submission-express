@@ -15,14 +15,18 @@ namespace auth {
         password: string // MAKE SURE TO HASH
     }
 
+    // TODO: Don't hardcode this.
+    export const SECRET = 'secretcode';
+
     /**
      * The active session information.
      */
     export const sessionMiddleware = session({
-        secret: 'secretcode',
+        secret: SECRET,
         resave: true,
-        saveUninitialized: true
+        saveUninitialized: true,
     })
+    
 
     /**
      * Initialize authorization API.

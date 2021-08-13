@@ -65,8 +65,12 @@ export default class ServerInterface {
             }
             
             let socket;
+            console.log(`Establishing socket connection to ${address}`);
             try {
                 socket = io(address);
+                socket.on('connect', () => {
+                    console.log("Socket connection established.");
+                })
             } catch (e) {
                 return reject(`Unable to establish socket connection. ${e}`);
             }
