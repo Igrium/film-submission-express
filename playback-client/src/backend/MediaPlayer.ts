@@ -4,6 +4,7 @@ import EventEmitter from 'events';
 export default class MediaPlayer {
     private _window: BrowserWindow;
     private _emitter = new EventEmitter()
+    private _isPlaying: boolean;
 
     constructor() {
         this._window = new BrowserWindow({
@@ -21,16 +22,18 @@ export default class MediaPlayer {
 
         const mediaFinished = () => this.emitter.emit('mediaFinished')
         const durationChange = (event: any, duration: number) => this.emitter.emit('durationChange', duration);
-        const timeUpdate = (event: any, time: number) => this.emitter.emit('timeUpdate', time);
+        const timeUpdate = (event: any, time: number) => {
+            this.emitter.emit('timeUpdate', time);
+        }
 
         ipcMain.on('player.mediaFinished', mediaFinished);
         ipcMain.on('player.durationChange', durationChange);
-        ipcMain.on('timeUpdate', timeUpdate);
+        ipcMain.on('player.timeUpdate', timeUpdate);
         
         this.window.once('closed', () => {
             ipcMain.off('player.mediaFinished', mediaFinished);
             ipcMain.off('player.durationChange', durationChange);
-            ipcMain.off('timeUpdate', timeUpdate);
+            ipcMain.off('player.timeUpdate', timeUpdate);
             this.emitter.emit('closed');
         })
     }
@@ -41,6 +44,43 @@ export default class MediaPlayer {
 
     public get emitter() {
         return this._emitter;
+    }
+
+    public get isPlaying() {
+        return this._isPlaying;
+    }
+
+    /**
+     * Query the media render process for whether the media is playing or not.
+     */
+    public getIsPlaying() {
+        return new Promise<boolean>((resolve, reject) => {
+            try {
+                this.window.webContents.send('isPlaying', (response: boolean) => {
+                    resolve(response);
+                })
+            } catch (error) {
+                reject(error);
+            }
+        })
+    }
+
+    public setPlaying(playing: boolean) {
+        this.window.webContents.send('setIsPlaying', playing);
+        this._isPlaying = playing;
+        this.emitter.emit('setIsPlaying', this.isPlaying);
+    }
+
+    public play() {
+        this.setPlaying(true);
+    }
+
+    public pause() {
+        this.setPlaying(false);
+    }
+
+    public toggle() {
+        this.setPlaying(!this.isPlaying);
     }
 
     /**
@@ -64,6 +104,10 @@ export default class MediaPlayer {
         this.emitter.on('timeUpdate', listener);
     }
 
+    public onSetIsPlaying(listener: (playing: boolean) => void) {
+        this.emitter.on('setIsPlaying', listener);
+    }
+
     /**
      * Display an image in the player.
      * @param image Image URL.
@@ -79,6 +123,8 @@ export default class MediaPlayer {
     public displayVideo(video: string) {
         console.log(`Playing video from ${video}`);
         this.window.webContents.send('displayVideo', video);
+        this._isPlaying = true;
+        this.emitter.emit('setIsPlaying', true);
     }
 
     /**

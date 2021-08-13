@@ -5,7 +5,8 @@ import PlaybackControls from '../components/PlaybackControls'
 
 interface IState {
     mediaTime: number,
-    mediaDuration: number
+    mediaDuration: number,
+    playing: boolean
 }
 
 export default class Controls extends Component<{}, IState> {
@@ -14,7 +15,8 @@ export default class Controls extends Component<{}, IState> {
     
         this.state = {
             mediaTime: 0,
-            mediaDuration: 1
+            mediaDuration: 1,
+            playing: false
         }
     }
     
@@ -26,14 +28,24 @@ export default class Controls extends Component<{}, IState> {
         backendInterface.onMediaDurationChange((duration) => {
             this.setState({ mediaDuration: duration });
         });
+
+        backendInterface.onSetIsPlaying(playing => {
+            this.setState({ playing });
+        })
     }
 
     render() {
-        const { mediaTime, mediaDuration } = this.state;
+        const { mediaTime, mediaDuration, playing } = this.state;
 
         return (
             <Container>
-                <PlaybackControls time={mediaTime} duration={mediaDuration} />
+                <PlaybackControls
+                    time={mediaTime}
+                    duration={mediaDuration}
+                    playing={playing}
+                    onPlayPause={() => {
+                        backendInterface.togglePlayback();
+                    }} />
                 <Button onClick={() => {
                     backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/server/data/media/AtVsyaDfhr.mp4')
                 }}>Media Test</Button>

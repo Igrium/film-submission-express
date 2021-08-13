@@ -2,7 +2,6 @@ import { BackendAPI, Creds } from '../util';
 import { EventEmitter } from 'events';
 const api: BackendAPI = (window as any).backendAPI;
 
-console.log(api)
 module backendInterface {
     export const emitter = new EventEmitter
 
@@ -43,30 +42,26 @@ module backendInterface {
         api.send('loadVideoFile', url);
     }
 
+    export function togglePlayback() {
+        api.send('togglePlayback');
+    }
+
     export function onMediaFinished(listener: () => void) {
-        emitter.on('mediaFinished', listener);
+        api.on('mediaFinished', listener);
     }
 
     export function onMediaDurationChange(listener: (duration: number) => void) {
-        emitter.on('mediaDurationChange', listener);
+        api.on('mediaDurationChange', listener)
     }
 
     export function onMediaTimeUpdate(listener: (time: number) => void) {
         emitter.on('mediaTimeUpdate', listener);
+        api.on('mediaTimeUpdate', listener);
     }
 
-    api.on('mediaFinished', () => {
-        emitter.emit('mediaFinished');
-    });
-
-    api.on('mediaDurationChange', (duration) => {
-        emitter.emit('mediaDurationChange', duration);
-    });
-
-    api.on('mediaTimeUpdate', (time) => {
-        console.log(`Time: ${time}`)
-        emitter.emit('mediaTimeUpdate', time);
-    });
+    export function onSetIsPlaying(listener: (isPlaying: boolean) => void) {
+        api.on('setIsPlaying', listener);
+    }
 }
 
 export default backendInterface;

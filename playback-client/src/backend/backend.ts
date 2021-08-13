@@ -17,19 +17,23 @@ module backend {
             });
             
             mediaPlayer.onMediaFinished(() => {
-                ipcMain.emit('mediaFinished');
+                mainWindow.webContents.send('mediaFinished');
             });
 
             mediaPlayer.onDurationChange((duration) => {
-                ipcMain.emit('mediaDurationChange', duration);
+                mainWindow.webContents.send('mediaDurationChange', duration);
             });
 
             mediaPlayer.onTimeUpdate((time) => {
-                ipcMain.emit('mediaTimeUpdate', time);
+                mainWindow.webContents.send('mediaTimeUpdate', time);
             });
+
+            mediaPlayer.onSetIsPlaying((playing) => {
+                mainWindow.webContents.send('setIsPlaying', playing);
+            })
         }
     }
-
+ 
     ipcMain.handle('login', (event, creds: Creds) => {
         return new Promise<any | undefined>((resolve, reject) => {
             ServerInterface.connect(creds).then(connection => {
@@ -55,6 +59,12 @@ module backend {
     ipcMain.on('loadVideoFile', (event, url: string) => {
         if (mediaPlayer) {
             mediaPlayer.displayVideo(url);
+        }
+    })
+
+    ipcMain.on('togglePlayback', event => {
+        if (mediaPlayer) {
+            mediaPlayer.toggle();
         }
     })
 }

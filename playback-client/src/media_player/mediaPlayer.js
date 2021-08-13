@@ -143,6 +143,15 @@ ipcRenderer.on('pause', (event, arg) => {
     pause();
 })
 
-ipcRenderer.on('isPlaying', (event, arg) => {
-    ipcRenderer.send('isPlayingResponse', isPlaying());
+ipcRenderer.on('setIsPlaying', (event, arg) => {
+    console.log(`playing: ${arg}`);
+    if (arg === true) {
+        play();
+    } else {
+        pause();
+    }
+})
+
+ipcRenderer.on('isPlaying', (event, callback) => {
+    callback(isPlaying);
 })
