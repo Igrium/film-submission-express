@@ -1,3 +1,5 @@
+import { FilmInfo } from 'fse-shared/dist/meta';
+
 export interface Creds {
     address: string,
     username: string,
@@ -13,11 +15,15 @@ export interface BackendAPI {
 export interface ReplicationModel {
     mediaDuration: number,
     mediaTime: number,
-    isPlaying: boolean
+    isPlaying: boolean,
+    pipelineOrder: string[],
+    pipelineFilms: Record<string, FilmInfo>
 }
 
 export const defaultReplication: ReplicationModel = {
     isPlaying: false,
     mediaDuration: 10,
-    mediaTime: 0
+    mediaTime: 0,
+    pipelineOrder: [],
+    pipelineFilms: {}
 }

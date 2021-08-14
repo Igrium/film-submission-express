@@ -3,6 +3,7 @@ import { Creds } from '../util';
 import axios from 'axios';
 import { FilmInfo } from 'fse-shared/dist/meta';
 import EventEmitter from 'events';
+import { Replicator } from 'fse-shared/dist/replication';
 
 /**
  * Client proxy of playbill. DO NOT WRITE TO DIRECTLY!
@@ -20,6 +21,28 @@ export class ClientPlayBill {
     onSetOrder(listener: (order: string[]) => void) {
         this.emitter.on('setOrder', listener);
     }
+}
+
+export class SocketClientReplicator<T extends object> extends Replicator<T> {
+    public readonly connection: Socket;
+
+    constructor(connection: Socket, data: T) {
+        super(data, false);
+        this.connection = connection;
+    }
+
+    protected send(data: Partial<T>): void {
+        this.connection.emit('replicate', data);
+    }
+    protected listen(callback: (data: Partial<T>) => void): void {
+        this.connection.on('replicate', data => callback(data));
+    }
+    protected request(callback: (data: T) => void): void {
+        this.connection.emit('sync', (data: T) => {
+            callback(data);
+        })
+    }
+
 }
 
 /**
@@ -73,6 +96,46 @@ export default class ServerInterface {
     }
 
     /**
+     * Synchronize the local proxy with the server.
+     * Does not call listeners, as this is generally used
+     * upon initial connection.
+     */
+    public async sync() {
+        console.log("Syncing with server...");
+
+        let filmPromise = this.getFilms();
+        let orderPromise = this.getOrder();
+
+        let result = await Promise.all([filmPromise, orderPromise]);
+        this.playbill.films = result[0];
+        this.playbill.order = result[1];
+    }
+    
+    private async getFilms() {
+        return new Promise<Record<string, FilmInfo>>((resolve, reject) => {
+            try {
+                this.socket.emit('getFilms', (films: Record<string, FilmInfo>) => {
+                    resolve(films);
+                })
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    private async getOrder() {
+        return new Promise<string[]>((resolve, reject) => {
+            try {
+                this.socket.emit('getOrder', (order: string[]) => {
+                    resolve(order);
+                })
+            } catch (e) {
+                reject(e);
+            }
+        })
+    }
+
+    /**
      * Attempt to connect to a FSE server.
      * @param credentials Credentials to connect with.
      * @returns A promise that resolves on successful connection and rejects on unsuccessful connection.
@@ -109,7 +172,9 @@ export default class ServerInterface {
                 return reject(`Unable to establish socket connection. ${e}`);
             }
 
-            resolve(new ServerInterface(socket, address, credentials));
+            let server = new ServerInterface(socket, address, credentials);
+            await server.sync();
+            resolve(server);
         });
     }
     

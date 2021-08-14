@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
-import { Button, Col, Container, Form, FormControl, Row } from 'react-bootstrap'
+import { Button, Col, Container, Form, FormControl, ListGroup, Row } from 'react-bootstrap'
+import { List } from 'react-bootstrap-icons'
 import { ReplicationModel } from '../../util'
 import backendInterface from '../backend_interface'
 import PlaybackControls from '../components/PlaybackControls'
@@ -7,7 +8,8 @@ import PlaybackControls from '../components/PlaybackControls'
 interface IState {
     mediaTime: number,
     mediaDuration: number,
-    playing: boolean
+    playing: boolean,
+    pipelineOrder: string[]
 }
 
 export default class Controls extends Component<{}, IState> {
@@ -17,7 +19,8 @@ export default class Controls extends Component<{}, IState> {
         this.state = {
             mediaTime: 0,
             mediaDuration: 1,
-            playing: false
+            playing: false,
+            pipelineOrder: []
         }
     }
     
@@ -29,11 +32,12 @@ export default class Controls extends Component<{}, IState> {
     private updateState(data: Partial<ReplicationModel>) {
         if (data.mediaDuration) this.setState({ mediaDuration: data.mediaDuration });
         if (data.mediaTime) this.setState({ mediaTime: data.mediaTime });
-        if ('isPlaying' in data) this.setState({ playing: data.isPlaying as boolean });
+        if (data.isPlaying !== undefined) this.setState({ playing: data.isPlaying });
+        if (data.pipelineOrder) this.setState({ pipelineOrder: data.pipelineOrder });
     }
 
     render() {
-        const { mediaTime, mediaDuration, playing } = this.state;
+        const { mediaTime, mediaDuration, playing, pipelineOrder } = this.state;
 
         return (
             <Container>
@@ -47,6 +51,9 @@ export default class Controls extends Component<{}, IState> {
                 <Button onClick={() => {
                     backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/fse-server/data/media/AtVsyaDfhr.mp4')
                 }}>Media Test</Button>
+                <ListGroup>
+                    {pipelineOrder.map(value => <ListGroup.Item id={value}>{value}</ListGroup.Item>)}
+                </ListGroup>
             </Container>
         )
     }

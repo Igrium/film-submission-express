@@ -1,4 +1,5 @@
 import { EventEmitter } from 'events';
+import { FilmInfo } from './meta';
 
 /**
  * Handles replication of values between a server and client.
@@ -98,4 +99,10 @@ export abstract class Replicator<Model extends object> {
         })
     }
 
+}
+
+export interface PlaybackReplicationModel {
+    films: Record<string, FilmInfo>,
+    order: string[],
+    downloadQuueue: string[]
 }

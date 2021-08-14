@@ -80,9 +80,24 @@ module backend {
         }
     })
 
+    /**
+     * Log into a server.
+     * @param creds Credentials to use. Includes server address.
+     */
     export async function login(creds: Creds) {
         server = await ServerInterface.connect(creds);
         mediaManager = new LocalMediaManager(server, './media');
+        server.playbill.onSetOrder(order => {
+            replicator.setData({ pipelineOrder: order });
+        })
+        server.playbill.onModifyFilm((id, data) => {
+            replicator.setData({ pipelineFilms: server?.playbill.films });
+        })
+        replicator.setData({
+            pipelineFilms: server.playbill.films,
+            pipelineOrder: server.playbill.order
+        })
+        return server;
     }
 
     ipcMain.handle('getCredentials', () => {

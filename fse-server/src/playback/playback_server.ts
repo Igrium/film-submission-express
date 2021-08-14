@@ -6,11 +6,36 @@ import auth from '../api/auth';
 import passport from 'passport';
 import passportSocketIo from 'passport.socketio';
 import PlayBill from '../playbill';
+import { PlaybackReplicationModel, Replicator } from 'fse-shared/dist/replication';
+import { FilmInfo } from 'fse-shared/dist/meta';
 
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
 
-export interface ReplicationModel {
+export class SocketServerReplicator<T extends object> extends Replicator<T> {
+    public readonly connection: Socket;
+
+    constructor(connection: Socket, data: T) {
+        super(data, true);
+        this.connection = connection;
+    }
+
+    init() {
+        super.init();
+        this.connection.on('sync', callback => {
+            callback(this.data);
+        });
+    }
+
+    protected send(data: Partial<T>): void {
+        this.connection.emit('replicate', data);
+    }
+    protected listen(callback: (data: Partial<T>) => void): void {
+        this.connection.on('replicate', data => callback(data));
+    }
+    protected request(callback: (data: T) => void): void {
+        throw new Error('Method not implemented.');
+    }
 
 }
 
@@ -71,7 +96,15 @@ export default class PlaybackServer {
 
         socket.on('setDownloadQueue', queue => {
             this._downloadQueue = queue;
-        })
+        });
+
+        socket.on('getFilms', (callback: (films: Record<string, FilmInfo>) => void) => {
+            callback(this.playbill.films);
+        });
+
+        socket.on('getOrder', (callback: (order: string[]) => void) => {
+            callback(this.playbill.order);
+        });
     }
     
     private initListeners() {
