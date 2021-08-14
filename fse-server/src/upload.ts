@@ -3,8 +3,8 @@ import fs from 'fs';
 import uploader from 'huge-uploader-nodejs';
 import { nanoid } from 'nanoid';
 import path from "path";
-import { ApprovalState, FilmInfo, UploadState } from '../../shared/dist/meta.js';
-import { UploadMeta, UploadRequest } from '../../shared/dist/upload.js';
+import { ApprovalState, FilmInfo, UploadState } from 'fse-shared/dist/meta'
+import { UploadMeta, UploadRequest } from 'fse-shared/dist/upload';
 import { app, processor } from "./app.js";
 import { Config } from "./config.js";
 import PlayBill from "./playbill.js";
@@ -82,28 +82,6 @@ function handleFinishUpload(data: any, config: Config, playbill: PlayBill) {
 
     console.log(`Recieved film and assigned it id: '${id}'`);
     console.log(info);
+    playbill.append(id);
     processor.process(data.filePath, id, path.extname(info.filename));
-}
-
-function initUpload(request: UploadRequest, id: string, config: Config): UploadMeta {
-    console.log(`Initializing upload for film: '${id}'.`);
-
-    const uploadFolder = path.resolve(config.data_folder, 'uploading', id);
-    fs.mkdirSync(uploadFolder, { recursive: true });
-
-    let size = request.size;
-    let chunks = Math.ceil(size / config.upload_chunk_size);
-
-    let uploadInfo: FileUploadInfo = {
-        size: size,
-        numChunks: chunks,
-        hash: request.hash,
-        uploadedChunks: 0
-    }
-
-    fs.writeFileSync(path.resolve(uploadFolder, 'meta'), JSON.stringify(uploadInfo));
-    return {
-        id,
-        chunkSize: config.upload_chunk_size
-    }
 }

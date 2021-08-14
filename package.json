@@ -1,0 +1,7 @@
+{
+    "private": true,
+    "workspaces": {
+        "packages": ["admin-panel", "fse-server", "fse-shared", "fse-submission-portal", "fse-playback-client"],
+        "nohoist": ["fse-playback-client/**"]
+    }
+}

@@ -72,7 +72,7 @@
   },
   "references": [
     {
-      "path": "../shared"
+      "path": "../fse-shared"
     }
   ],
   "include": ["src", "decs.d.ts"]

@@ -2,7 +2,7 @@ import { Config } from "../config.js";
 import PlayBill from "../playbill.js";
 import { json, Router } from "express";
 import { initUploadAPI } from "../upload.js";
-import { UploadState } from "../../../shared/dist/meta.js";
+import { UploadState } from "fse-shared/dist/meta";
 import path from "path";
 import fs from "fs";
 import { initFilmAPI } from "./films.js";

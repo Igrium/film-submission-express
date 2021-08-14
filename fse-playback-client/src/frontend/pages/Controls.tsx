@@ -45,7 +45,7 @@ export default class Controls extends Component<{}, IState> {
                         backendInterface.togglePlayback();
                     }} />
                 <Button onClick={() => {
-                    backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/server/data/media/AtVsyaDfhr.mp4')
+                    backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/fse-server/data/media/AtVsyaDfhr.mp4')
                 }}>Media Test</Button>
             </Container>
         )

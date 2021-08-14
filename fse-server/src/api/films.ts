@@ -51,10 +51,7 @@ export function initFilmAPI(config: Config, playbill: PlayBill) {
         }
     
         console.log(`Recieved update to film '${id}': ${JSON.stringify(req.body)}.`)
-        if (info.title) playbill.database.push(`/films/${id}/title`, info.title);
-        if (info.producer) playbill.database.push(`/films/${id}/producer`, info.producer);
-        if (info.email) playbill.database.push(`/films/${id}/email`, info.email);
-        if (info.approvalState !== undefined) playbill.database.push(`/films/${id}/approvalState`, info.approvalState);
+        playbill.modifyFilm(id, { title: info.title, producer: info.producer, email: info.email, approvalState: info.approvalState });
     
         res.end();
     })

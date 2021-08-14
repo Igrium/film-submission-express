@@ -25,7 +25,7 @@
   ],
   "references": [
     {
-      "path": "../shared"
+      "path": "../fse-shared"
     }
   ]
 }

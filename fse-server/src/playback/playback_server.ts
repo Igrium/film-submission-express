@@ -5,6 +5,7 @@ import { Server } from 'http'
 import auth from '../api/auth';
 import passport from 'passport';
 import passportSocketIo from 'passport.socketio';
+import PlayBill from '../playbill';
 
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
@@ -18,13 +19,15 @@ export interface ReplicationModel {
  */
 export default class PlaybackServer {
     private _io: SocketServer
+    private _playbill: PlayBill;
 
     /**
      * Construct a playback server.
      * @param http HTTP server to start on.
      */
-    constructor(http: Server) {
+    constructor(http: Server, playbill: PlayBill) {
         this._io = new SocketServer(http);
+        this._playbill = playbill;
 
         this.io.use(wrap(auth.sessionMiddleware));
         this.io.use(wrap(passport.initialize()));
@@ -40,6 +43,7 @@ export default class PlaybackServer {
             next();
         })
         this.io.on('connection', socket => this.initConnection(socket));
+        this.initListeners();
     }
 
     /**
@@ -47,6 +51,10 @@ export default class PlaybackServer {
      */
     public get io() {
         return this._io
+    }
+
+    public get playbill() {
+        return this._playbill;
     }
 
     private initConnection(socket: Socket) {
@@ -57,5 +65,13 @@ export default class PlaybackServer {
         (session as any).socketId = socket.id;
     }
     
-    
+    private initListeners() {
+        this.playbill.onSetOrder(order => {
+            this.io.emit('setFilmOrder', order);
+        })
+
+        this.playbill.onModifyFilm((id, data) => {
+            this.io.emit('modifyFilm', id, data);
+        })
+    }
 }

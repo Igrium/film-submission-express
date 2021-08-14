@@ -2,7 +2,7 @@ import { Config } from "./config";
 import PlayBill from "./playbill";
 import handbrake, { HandbrakeOptions } from "handbrake-js";
 import path from "path";
-import { TranscodeState, UploadState } from "../../shared/dist/meta.js"
+import { TranscodeState, UploadState } from "fse-shared/dist/meta"
 import fs from 'fs';
 import pipeline from './pipeline'
 

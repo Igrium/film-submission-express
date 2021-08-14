@@ -62,6 +62,61 @@ export default class PlayBill {
     get order() {
         return this.database.getObject<string[]>('/order');
     }
+
+    /**
+     * Modify the data in a film entry.
+     * @param id ID of the film.
+     * @param data Data to modify.
+     */
+    public modifyFilm(id: string, data: Partial<FilmInfo>) {
+        if (!this.database.exists(`/films/${id}`)) {
+            throw new Error(`No film with ID '${id}'`);
+        }
+        let film = this.database.getObject<FilmInfo>(`/films/${id}`);
+        let merged = merge(film, data)
+        this.database.push(`/films/${id}`, merged);
+        this.emitter.emit('modifyFilm', id, merged);
+    }
+
+    public onModifyFilm(listener: (id: string, data: FilmInfo) => void) {
+        this.emitter.on('modifyFilm', listener);
+    }
+
+    /**
+     * Set the order that films will play in.
+     * @param order Film IDs in the proper order.
+     */
+    public setOrder(order: string[]) {
+        this.database.push('/order', order);
+        this.emitter.emit('setOrder', order);
+    }
+
+    /**
+     * Append a set of films to the back of the order.
+     * @param ids Film IDs to add.
+     */
+    public append(...ids: string[]) {
+        let order = this.order;
+        order.push(...ids);
+        this.setOrder(order);
+    }
+
+    public onSetOrder(listener: (order: string[]) => void) {
+        this.emitter.on('setOrder', listener);
+    }
+    
+}
+
+function merge<T>(base: T, layer: Partial<T>) {
+    const obj: any = {};
+    Object.keys(base).forEach(key => {
+        if (key in layer && (layer as any)[key] !== undefined) {
+            obj[key] = (layer as any)[key];
+        } else {
+            obj[key] = (base as any)[key];
+        }
+    })
+    return obj as T;
 }
 
 export async function loadDB(config: Config) {

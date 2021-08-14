@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "description": "The central server of Film Submission Express",
   "exports": "./dist/app.js",
+  "main": "./dist/app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "tsc && node ./dist/app.js",
@@ -36,7 +37,7 @@
     "express": "^4.17.1",
     "express-http-proxy": "^1.6.2",
     "express-session": "^1.17.2",
-    "fse-shared": "file:../shared",
+    "fse-shared": "0.1.0",
     "handbrake-js": "^5.0.2",
     "http-errors": "^1.7.2",
     "huge-uploader-nodejs": "^1.2.1",

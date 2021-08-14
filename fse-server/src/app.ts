@@ -35,7 +35,7 @@ async function start() {
     app.use('/submit', express.static(path.join(__dirname, '../../submission-portal/build/')));
     app.use('/admin', express.static(path.join(__dirname, '../../admin-panel/build/')));
 
-    playbackServer = new PlaybackServer(http);
+    playbackServer = new PlaybackServer(http, playbill);
 
     http.listen(config.port, () => {
         console.log(`Film Sumbission server started on port ${config.port}.`)
