@@ -33,6 +33,7 @@ export function initFilmAPI(config: Config, playbill: PlayBill) {
         }
     })
     
+    
     router.post('/:id', auth.checkCurator, (req, res) => {
         const id = req.params.id;
         if (!(id in playbill.films)) {

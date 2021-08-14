@@ -39,6 +39,22 @@ export module api {
         }
         return response.data as Record<string, TranscodeStatus>
     }
+
+    /**
+     * Get the current film order from the server.
+     * @returns The current film order.
+     */
+    export async function getOrder() {
+        return (await client.get('/api/order')).data as string[]
+    }
+    
+    /**
+     * Set the film order. Must be logged in as a curator.
+     * @param order The new film order.
+     */
+    export async function setOrder(order: string[]) {
+        await client.post('/api/order', order, { withCredentials: true });
+    }
     
     /**
      * Get the current user.
@@ -103,7 +119,6 @@ export module api {
     export async function getAllUserData() {
         return (await client.get('/api/users/all-data', { withCredentials: true })).data as Record<string, SimpleUser>;
     }
-    
 }
 
 export default api;

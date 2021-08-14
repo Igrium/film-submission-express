@@ -20,6 +20,7 @@ export interface ReplicationModel {
 export default class PlaybackServer {
     private _io: SocketServer
     private _playbill: PlayBill;
+    private _downloadQueue: string[] = [];
 
     /**
      * Construct a playback server.
@@ -57,12 +58,20 @@ export default class PlaybackServer {
         return this._playbill;
     }
 
+    public get downloadQueue() {
+        return this._downloadQueue;
+    }
+
     private initConnection(socket: Socket) {
         console.log(`New socket connection ${socket.id}`)
 
         const session = (socket.request as express.Request).session;
         console.log(`Saving sid ${socket.id} in session ${session.id}`);
         (session as any).socketId = socket.id;
+
+        socket.on('setDownloadQueue', queue => {
+            this._downloadQueue = queue;
+        })
     }
     
     private initListeners() {
@@ -73,5 +82,19 @@ export default class PlaybackServer {
         this.playbill.onModifyFilm((id, data) => {
             this.io.emit('modifyFilm', id, data);
         })
+    }
+
+    refreshDownloadQueue() {
+        this.io.emit('setDownloadQueue', this.downloadQueue);
+    }
+
+    public setDownloadQueue(queue: string[]) {
+        this._downloadQueue = queue;
+        this.refreshDownloadQueue();
+    }
+
+    public queueDownload(id: string) {
+        this.downloadQueue.push(id);
+        this.refreshDownloadQueue();
     }
 }

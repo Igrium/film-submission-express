@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 import path from "path";
 import { ApprovalState, FilmInfo, UploadState } from 'fse-shared/dist/meta'
 import { UploadMeta, UploadRequest } from 'fse-shared/dist/upload';
-import { app, processor } from "./app.js";
+import { app, playbackServer, processor } from "./app.js";
 import { Config } from "./config.js";
 import PlayBill from "./playbill.js";
 
@@ -83,5 +83,9 @@ function handleFinishUpload(data: any, config: Config, playbill: PlayBill) {
     console.log(`Recieved film and assigned it id: '${id}'`);
     console.log(info);
     playbill.append(id);
-    processor.process(data.filePath, id, path.extname(info.filename));
+    processor.process(data.filePath, id, path.extname(info.filename), (result) => {
+        if (typeof result === 'string') {
+            playbackServer.queueDownload(id);
+        }
+    });
 }

@@ -46,6 +46,16 @@ export function initAPI(config: Config, playbill: PlayBill) {
 
     })
 
+    router.get('/api/order', (req, res) => {
+        res.json(playbill.order);
+    })
+
+    router.post('/api/order', auth.checkCurator, (req, res) => {
+        const order = req.body as string[]
+        playbill.setOrder(order);
+        res.end();
+    })
+
     initUploadAPI(config, playbill, router);
     return router;
 }

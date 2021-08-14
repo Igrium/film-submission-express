@@ -3,12 +3,15 @@ import { Creds, defaultReplication, ReplicationModel } from '../util';
 import MediaPlayer from './MediaPlayer';
 import ServerInterface from './ServerInterface';
 import { Replicator } from 'fse-shared/dist/replication';
+import LocalMediaManager from './LocalMediaManager';
+import { Server } from 'react-bootstrap-icons';
 
 module backend {
     export let server: ServerInterface | null = null;
     export let mainWindow: BrowserWindow;
     export let mediaPlayer: MediaPlayer | null = null;
     export let replicator: Replicator<ReplicationModel>
+    export let mediaManager: LocalMediaManager | null;
 
     class IpcReplicator<T extends object> extends Replicator<T> {
 
@@ -69,16 +72,18 @@ module backend {
         }
     }
  
-    ipcMain.handle('login', (event, creds: Creds) => {
-        return new Promise<any | undefined>((resolve, reject) => {
-            ServerInterface.connect(creds).then(connection => {
-                server = connection;
-                resolve(undefined);
-            }).catch(err => {
-                resolve(err);
-            })
-        });
+    ipcMain.handle('login', async (event, creds: Creds) => {
+        try {
+            await login(creds);
+        } catch (err) {
+            return err;
+        }
     })
+
+    export async function login(creds: Creds) {
+        server = await ServerInterface.connect(creds);
+        mediaManager = new LocalMediaManager(server, './media');
+    }
 
     ipcMain.handle('getCredentials', () => {
         if (server) {
