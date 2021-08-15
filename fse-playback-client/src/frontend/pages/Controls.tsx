@@ -1,15 +1,18 @@
+import { FilmInfo } from 'fse-shared/dist/meta'
 import React, { Component } from 'react'
-import { Button, Col, Container, Form, FormControl, ListGroup, Row } from 'react-bootstrap'
+import { Button, Card, Col, Container, Form, FormControl, ListGroup, Row } from 'react-bootstrap'
 import { List } from 'react-bootstrap-icons'
 import { ReplicationModel } from '../../util'
 import backendInterface from '../backend_interface'
+import PipelinePlaylistView from '../components/PipelinePlaylistView'
 import PlaybackControls from '../components/PlaybackControls'
 
 interface IState {
     mediaTime: number,
     mediaDuration: number,
     playing: boolean,
-    pipelineOrder: string[]
+    pipelineOrder: string[],
+    pipelineFilms: Record<string, FilmInfo>
 }
 
 export default class Controls extends Component<{}, IState> {
@@ -20,7 +23,8 @@ export default class Controls extends Component<{}, IState> {
             mediaTime: 0,
             mediaDuration: 1,
             playing: false,
-            pipelineOrder: []
+            pipelineOrder: [],
+            pipelineFilms: {}
         }
     }
     
@@ -34,10 +38,11 @@ export default class Controls extends Component<{}, IState> {
         if (data.mediaTime) this.setState({ mediaTime: data.mediaTime });
         if (data.isPlaying !== undefined) this.setState({ playing: data.isPlaying });
         if (data.pipelineOrder) this.setState({ pipelineOrder: data.pipelineOrder });
+        if (data.pipelineFilms) this.setState({ pipelineFilms: data.pipelineFilms });
     }
 
     render() {
-        const { mediaTime, mediaDuration, playing, pipelineOrder } = this.state;
+        const { mediaTime, mediaDuration, playing, pipelineOrder, pipelineFilms } = this.state;
 
         return (
             <Container>
@@ -48,12 +53,16 @@ export default class Controls extends Component<{}, IState> {
                     onPlayPause={() => {
                         backendInterface.togglePlayback();
                     }} />
-                <Button onClick={() => {
+                <Button className='mb-3' onClick={() => {
                     backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/fse-server/data/media/AtVsyaDfhr.mp4')
                 }}>Media Test</Button>
-                <ListGroup>
-                    {pipelineOrder.map(value => <ListGroup.Item id={value}>{value}</ListGroup.Item>)}
-                </ListGroup>
+                <Card>
+                    <Card.Header>Pipeline Film Playlist</Card.Header>
+                    <Card.Body>
+                        <PipelinePlaylistView order={pipelineOrder} films={pipelineFilms} />
+                    </Card.Body>
+                </Card>
+                
             </Container>
         )
     }

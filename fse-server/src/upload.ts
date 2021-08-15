@@ -79,7 +79,7 @@ function handleFinishUpload(data: any, config: Config, playbill: PlayBill) {
 
     let id = nanoid(10);
     playbill.database.push(`/films/${id}`, info);
-
+    playbill.emitter.emit('modifyFilm', id, info);
     console.log(`Recieved film and assigned it id: '${id}'`);
     console.log(info);
     playbill.append(id);

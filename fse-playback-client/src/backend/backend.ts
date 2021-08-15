@@ -93,6 +93,7 @@ module backend {
         server.playbill.onModifyFilm((id, data) => {
             replicator.setData({ pipelineFilms: server?.playbill.films });
         })
+        console.log(server.playbill);
         replicator.setData({
             pipelineFilms: server.playbill.films,
             pipelineOrder: server.playbill.order
