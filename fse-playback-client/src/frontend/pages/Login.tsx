@@ -31,10 +31,10 @@ export default class Login extends Component<IProps, IState> {
     
     tryLogin(creds: Creds) {
         backendInterface.login(creds).then(() => {
-            this.setState({ alert: { varient: 'success', message: "Authenticated." } });
+            this.setState({ alert: { variant: 'success', message: "Authenticated." } });
             if (this.props.onLoggedIn) this.props.onLoggedIn(creds);
         }).catch((error) => {
-            this.setState({ alert: { varient: 'danger', message: error.toString() } });
+            this.setState({ alert: { variant: 'danger', message: error.toString() } });
         });
     }
 
@@ -43,7 +43,7 @@ export default class Login extends Component<IProps, IState> {
         event.preventDefault();
         const { address, username, password } = this.state;
         if (form.checkValidity()) {
-            this.setState({ validated: false, alert: { varient: 'primary', message: "Attempting login..." } });
+            this.setState({ validated: false, alert: { variant: 'primary', message: "Attempting login..." } });
             this.tryLogin({ address, username, password });
         } else {
             event.stopPropagation();
@@ -91,7 +91,7 @@ export default class Login extends Component<IProps, IState> {
                             <Button variant='primary' type='submit'>Submit</Button>
                         </Form>
                     </Card.Body>
-                    {alert ? <Alert variant={alert.varient} className='mt-2 mx-2'>{alert.message}</Alert> : null}
+                    {alert ? <Alert variant={alert.variant} className='mt-2 mx-2'>{alert.message}</Alert> : null}
                 </Card>
             </Container>
         )

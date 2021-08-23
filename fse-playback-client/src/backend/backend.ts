@@ -4,7 +4,6 @@ import MediaPlayer from './MediaPlayer';
 import ServerInterface from './ServerInterface';
 import { Replicator } from 'fse-shared/dist/replication';
 import LocalMediaManager from './LocalMediaManager';
-import { Server } from 'react-bootstrap-icons';
 
 module backend {
     export let server: ServerInterface | null = null;
@@ -48,7 +47,7 @@ module backend {
     }
 
     export function launchMediaPlayer() {
-        if (mediaPlayer === null) {
+        if (mediaPlayer == null) {
             mediaPlayer = new MediaPlayer();
             mediaPlayer.window.on('closed', () => {
                 mediaPlayer = null;
@@ -56,6 +55,7 @@ module backend {
             
             mediaPlayer.onMediaFinished(() => {
                 mainWindow.webContents.send('mediaFinished');
+                replicator.setData({ nowPlaying: null })
             });
 
             mediaPlayer.onDurationChange((duration) => {
@@ -68,6 +68,10 @@ module backend {
 
             mediaPlayer.onSetIsPlaying((playing) => {
                 replicator.setData({ isPlaying: playing });
+            })
+
+            mediaPlayer.onError((message, error) => {
+                mainWindow.webContents.send('mediaError', message, error);
             })
         }
     }
@@ -115,6 +119,10 @@ module backend {
     ipcMain.on('loadVideoFile', (event, url: string) => {
         if (mediaPlayer) {
             mediaPlayer.displayVideo(url);
+            replicator.setData({ nowPlaying: {
+                local: true,
+                url: url
+            } })
         }
     })
 

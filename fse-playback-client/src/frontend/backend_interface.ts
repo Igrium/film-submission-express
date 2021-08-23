@@ -75,6 +75,10 @@ module backendInterface {
     export function onUpdateReplicationData(listener: (data: Partial<ReplicationModel>) => void) {
         replicator.onUpdate(listener);
     }
+
+    export function onMediaError(listener: (message: string, error: any) => void) {
+        api.on('mediaError', listener);
+    }
     
 }
 

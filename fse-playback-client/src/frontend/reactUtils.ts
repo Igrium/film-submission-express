@@ -1,4 +1,4 @@
 export interface AlertState {
-    varient: string,
+    variant: string,
     message: string
 }

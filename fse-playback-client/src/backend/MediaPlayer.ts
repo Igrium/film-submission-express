@@ -25,10 +25,14 @@ export default class MediaPlayer {
         const timeUpdate = (event: any, time: number) => {
             this.emitter.emit('timeUpdate', time);
         }
+        const error = (event: any, message: string, error: any) => {
+            this.emitter.emit('error', message, error);
+        }
 
         ipcMain.on('player.mediaFinished', mediaFinished);
         ipcMain.on('player.durationChange', durationChange);
         ipcMain.on('player.timeUpdate', timeUpdate);
+        ipcMain.on('player.error', error)
         
         this.window.once('closed', () => {
             ipcMain.off('player.mediaFinished', mediaFinished);
@@ -106,6 +110,10 @@ export default class MediaPlayer {
 
     public onSetIsPlaying(listener: (playing: boolean) => void) {
         this.emitter.on('setIsPlaying', listener);
+    }
+
+    public onError(listener: (message: string, error: any) => void) {
+        this.emitter.on('error', listener);
     }
 
     /**

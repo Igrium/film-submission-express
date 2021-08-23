@@ -11,12 +11,20 @@ var content;
  * @param {string} src Image URL.
  */
 function displayImage(src) {
-    clear();
-    var img = document.createElement('img');
-    img.src = src;
-    img.className = "content";
-    container.appendChild(img);
-    content = img;
+    try {
+        clear();
+        var img = document.createElement('img');
+        img.src = src;
+        img.className = "content";
+        img.onerror = (message, source, lineno, colno, err) => {
+            error(message, err)
+        }
+
+        container.appendChild(img);
+        content = img;
+    } catch (err) {
+        error(err)
+    }  
 }
 
 /**
@@ -24,40 +32,56 @@ function displayImage(src) {
  * @param {string} src Video URL.
  */
 function displayVideo(src) {
-    clear();
-    var video = document.createElement('video');
-    video.src = src;
-    video.autoplay = true;
+    try {
+        clear();
+        var video = document.createElement('video');
+        video.src = src;
+        video.autoplay = true;
+        
+        video.onended = () => {
+            ipcRenderer.send('player.mediaFinished');
+        }
     
-    video.onended = () => {
-        ipcRenderer.send('player.mediaFinished');
-    }
-
-    video.ondurationchange = () => {
-        ipcRenderer.send('player.durationChange', video.duration);
-    }
-
-    video.ontimeupdate = () => {
-        ipcRenderer.send('player.timeUpdate', video.currentTime);
-    }
+        video.ondurationchange = () => {
+            ipcRenderer.send('player.durationChange', video.duration);
+        }
     
-    video.className = "content";
-    container.appendChild(video);
-    content = video;
+        video.ontimeupdate = () => {
+            ipcRenderer.send('player.timeUpdate', video.currentTime);
+        }
+
+        video.onerror = (message, source, lineno, colno, err) => {
+            error(err);
+        }
+        
+        video.className = "content";
+        container.appendChild(video);
+        content = video;
+    } catch (err) {
+        error(err);
+    }  
 }
 
 /**
  * If a video is open, play it.
  */
 function play() {
-    content.play()
+    try {
+        content.play()
+    } catch (err) {
+        error(err);
+    }
 }
 
 /**
  * If a video is open, pause it.
  */
 function pause() {
-    content.pause()
+    try {
+        content.pause()
+    } catch (err) {
+        error(err);
+    }
 }
 
 /**
@@ -76,19 +100,23 @@ function isPlaying() {
  * @param {string} src 
  */
 function displayHTML(src) {
-    clear();
-    var iframe = document.createElement('iframe');
-    iframe.src = src;
-    iframe.className = "content";
-    container.appendChild(iframe);
-    content = iframe;
-
-    // Deselect everything just in case
-    if (window.getSelection) {
-        window.getSelection().removeAllRanges();
-    } else if (document.getSelection) {
-        document.getSelection.empty();
-    }
+    try {
+        clear();
+        var iframe = document.createElement('iframe');
+        iframe.src = src;
+        iframe.className = "content";
+        container.appendChild(iframe);
+        content = iframe;
+    
+        // Deselect everything just in case
+        if (window.getSelection) {
+            window.getSelection().removeAllRanges();
+        } else if (document.getSelection) {
+            document.getSelection.empty();
+        }
+    } catch (err) {
+        error(err);
+    } 
 }
 
 /**
@@ -155,3 +183,9 @@ ipcRenderer.on('setIsPlaying', (event, arg) => {
 ipcRenderer.on('isPlaying', (event, callback) => {
     callback(isPlaying);
 })
+
+function error(message, err) {
+    console.error(message);
+    console.log("Reporting error to backend.")
+    ipcRenderer.send('player.error', message, err);
+}
