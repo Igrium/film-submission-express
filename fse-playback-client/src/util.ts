@@ -12,6 +12,12 @@ export interface BackendAPI {
     on: (channel: string, listener: (...args: any[]) => void) => void
 }
 
+export interface NowPlaying {
+    local: boolean,
+    id?: string,
+    url: string
+}
+
 export interface ReplicationModel {
     mediaDuration: number,
     mediaTime: number,
@@ -19,6 +25,7 @@ export interface ReplicationModel {
     pipelineOrder: string[],
     pipelineFilms: Record<string, FilmInfo>,
     downloadStatus: Record<string, DownloadStatus>
+    nowPlaying: NowPlaying | null
 }
 
 export const defaultReplication: ReplicationModel = {
@@ -27,5 +34,6 @@ export const defaultReplication: ReplicationModel = {
     mediaTime: 0,
     pipelineOrder: [],
     pipelineFilms: {},
-    downloadStatus: {}
+    downloadStatus: {},
+    nowPlaying: null
 }
