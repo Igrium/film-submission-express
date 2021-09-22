@@ -1,4 +1,4 @@
-import { FilmInfo } from 'fse-shared/dist/meta';
+import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
 
 export interface Creds {
     address: string,
@@ -17,7 +17,8 @@ export interface ReplicationModel {
     mediaTime: number,
     isPlaying: boolean,
     pipelineOrder: string[],
-    pipelineFilms: Record<string, FilmInfo>
+    pipelineFilms: Record<string, FilmInfo>,
+    downloadStatus: Record<string, DownloadStatus>
 }
 
 export const defaultReplication: ReplicationModel = {
@@ -25,5 +26,6 @@ export const defaultReplication: ReplicationModel = {
     mediaDuration: 10,
     mediaTime: 0,
     pipelineOrder: [],
-    pipelineFilms: {}
+    pipelineFilms: {},
+    downloadStatus: {}
 }

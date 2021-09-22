@@ -78,3 +78,16 @@ export interface FilmInfo {
     approvalState: ApprovalState
 }
 
+export enum DownloadState {
+    Waiting,
+    Downloading,
+    Ready
+}
+
+export interface DownloadStatus {
+    /**
+     * A number from 0-1
+     */
+    percent?: number
+    state: DownloadState
+}

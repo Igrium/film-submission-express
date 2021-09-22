@@ -1,17 +1,28 @@
-import ServerInterface from './ServerInterface';
+import ServerInterface, { ClientPlayBill } from './ServerInterface';
 import path from 'path';
 import fs from 'fs';
+import { DownloadState, DownloadStatus } from 'fse-shared/dist/meta'
+import EventEmitter from 'events';
+
+interface DownloadHandle {
+    length: number,
+    percent: number
+}
 
 export default class LocalMediaManager {
     public downloadQueue: string[] = []
     public readonly connection: ServerInterface;
     public readonly mediaFolder: string;
+    public readonly installedFilms: string[] = [];
+    public readonly emitter = new EventEmitter();
+    private handles: Record<string, DownloadHandle>;
     
     private _isDownloading: boolean = false;
 
     public constructor(connection: ServerInterface, mediaFolder: string) {
         this.connection = connection;
         this.mediaFolder = mediaFolder;
+        
         fs.mkdirSync(mediaFolder, { recursive: true });
 
         connection.socket.on('setDownloadQueue', queue => {
@@ -20,6 +31,20 @@ export default class LocalMediaManager {
                 this.beginDownload();
             }
         })
+
+        fs.readdirSync(mediaFolder).forEach(name => {
+            if (name.endsWith('.mp4'))
+            this.installedFilms.push(path.basename(name, '.mp4'));
+        })
+
+        this.onUpdateDownloadStatus((id, status) => {
+            connection.updateDownloadStatus({ [id]: status })
+        })
+        const all: Record<string, DownloadStatus> = {};
+        this.installedFilms.forEach(id => {
+            all[id] = { state: DownloadState.Ready }
+        })
+        connection.updateDownloadStatus(all);
     }
 
     get isDownloading() {
@@ -27,26 +52,41 @@ export default class LocalMediaManager {
     }
     
     async download(id: string) {
-        this._isDownloading = true;       
+        try {
+            this._isDownloading = true;       
 
-        const url = new URL(`/api/media?id=${id}`, this.connection.hostname);
-        console.log(`Downloading film from ${url}`);
+            const url = new URL(`/api/media?id=${id}`, this.connection.hostname);
+            console.log(`Downloading film from ${url}`);
+    
+            const file = path.resolve(this.mediaFolder, id+'.mp4');
+            if (fs.existsSync(file)) {
+                console.warn("Film is already installed. Aborting.");
+            };
+            const writer = fs.createWriteStream(file);
+            const response = await ServerInterface.client.get(url.toString(), { responseType: 'stream' });
+            this.handles[id] = {length: response.headers['content-length'], percent: 0 };
+            this.updateDownloadStatus(id);
 
-        const file = path.resolve(this.mediaFolder, id+'.mp4');
-        if (fs.existsSync(file)) {
-            console.warn("Film is already installed. Aborting.");
-        };
-        const writer = fs.createWriteStream(file);
-
-        const response = await ServerInterface.client.get(url.toString(), { responseType: 'stream' });
-        
-        response.data.pipe(writer);
-
-        console.log(`Saved meda to ${file}`);
-        return new Promise((resolve, reject) => {
-            writer.on('finish', resolve);
-            writer.on('error', reject);
-        })
+            response.data.pipe(writer);
+            return new Promise<void>((resolve, reject) => {
+                writer.on('finish', () => {
+                    console.log(`Saved meda to ${file}`);
+                    this.installedFilms.push(id);
+                    delete this.handles[id];
+                    this.updateDownloadStatus(id);
+                    resolve();
+                });
+                writer.on('error', (err) => {
+                    delete this.handles[id];
+                    this.updateDownloadStatus(id);
+                    reject(err);
+                });
+            })
+        } catch (error) {
+            delete this.handles[id];
+            this.updateDownloadStatus(id);
+            throw error;
+        }
     }
 
     async beginDownload() {
@@ -59,6 +99,49 @@ export default class LocalMediaManager {
             }
             this.downloadQueue.shift();
         }
+    }
+
+    /**
+     * Get the download state of a given film.
+     * @param id ID of the film.
+     * @returns The film's download state.
+     */
+    getDownloadStatus(id: string): DownloadStatus {
+        if (this.installedFilms.includes(id)) {
+            return { state: DownloadState.Ready };
+        } else if (id in this.handles) {
+            return { state: DownloadState.Downloading }
+        } else {
+            return { state: DownloadState.Waiting }
+        }
+    }
+
+    /**
+     * Get the download status of all the films in the playbill.
+     * @returns A record of all the download states.
+     */
+    getAllDownloadStatus() {
+        const status: Record<string, DownloadStatus> = {};
+        Object.keys(this.connection.playbill.films).forEach(id => {
+            status[id] = this.getDownloadStatus(id);
+        })
+        return status;
+    }
+
+    /**
+     * Get a list of all the films that are actively downloading.
+     * @returns Downloading films.
+     */
+    getDownloadingFilms() {
+        return Object.keys(this.handles);
+    }
+    
+    onUpdateDownloadStatus(listener: (id: string, status: DownloadStatus) => void) {
+        this.emitter.on('updateDownloadStatus', listener);
+    }
+
+    private updateDownloadStatus(id: string) {
+        this.emitter.emit('updateDownloadStatus', id, this.getDownloadStatus(id));
     }
 
     /**

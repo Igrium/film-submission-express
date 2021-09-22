@@ -11,5 +11,19 @@ export default function pipelineAPI(config: Config, playbill: PlayBill) {
         res.json(transcodingFilms);
     })
 
+    router.get('/downloading', (req, res) => {
+        const downloadFilms = pipeline.downloadingFilms;
+        res.json(downloadFilms);
+    })
+
+    router.get('/downloading/:id', (req, res) => {
+        let id = req.params.id;
+        if (!(id in playbill.films)) {
+            res.status(404).json({ message: 'Film not found.' });
+            return;
+        }
+        res.json(pipeline.getDownloadStatus(id));
+    })
+
     return router;
 }

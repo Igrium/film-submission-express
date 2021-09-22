@@ -7,7 +7,8 @@ import passport from 'passport';
 import passportSocketIo from 'passport.socketio';
 import PlayBill from '../playbill';
 import { PlaybackReplicationModel, Replicator } from 'fse-shared/dist/replication';
-import { FilmInfo } from 'fse-shared/dist/meta';
+import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
+import pipeline from '../pipeline';
 
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
@@ -105,6 +106,13 @@ export default class PlaybackServer {
         socket.on('getOrder', (callback: (order: string[]) => void) => {
             callback(this.playbill.order);
         });
+
+        pipeline.downloadingFilms = {}; // We need to wait for the client to tell us about its download status.
+        socket.on('updateDownloadStatus', (status: Record<string, DownloadStatus>) => {
+            Object.keys(status).forEach(id => {
+                pipeline.downloadingFilms[id] = status[id];
+            })
+        })
     }
     
     private initListeners() {

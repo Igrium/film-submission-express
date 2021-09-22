@@ -1,7 +1,7 @@
 import io, { Socket } from 'socket.io-client';
 import { Creds } from '../util';
 import axios from 'axios';
-import { FilmInfo } from 'fse-shared/dist/meta';
+import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
 import EventEmitter from 'events';
 import { Replicator } from 'fse-shared/dist/replication';
 
@@ -81,6 +81,10 @@ export default class ServerInterface {
      */
     get hostname() {
         return this._hostname;
+    }
+
+    public updateDownloadStatus(status: Record<string, DownloadStatus>) {
+        this.socket.emit('updateDownloadStatus', status);
     }
 
     private initConnection() {

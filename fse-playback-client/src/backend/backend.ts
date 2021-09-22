@@ -96,7 +96,13 @@ module backend {
         console.log(server.playbill);
         replicator.setData({
             pipelineFilms: server.playbill.films,
-            pipelineOrder: server.playbill.order
+            pipelineOrder: server.playbill.order,
+            downloadStatus: mediaManager.getAllDownloadStatus()
+        })
+        mediaManager.onUpdateDownloadStatus((id, status) => {
+            let states = replicator.data.downloadStatus;
+            states[id] = status;
+            replicator.setData({ downloadStatus: states });
         })
         return server;
     }
