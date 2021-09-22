@@ -1,4 +1,5 @@
 import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
+import { LitePlaylist } from './api/Playlist';
 
 export interface Creds {
     address: string,
@@ -22,18 +23,14 @@ export interface ReplicationModel {
     mediaDuration: number,
     mediaTime: number,
     isPlaying: boolean,
-    pipelineOrder: string[],
-    pipelineFilms: Record<string, FilmInfo>,
-    downloadStatus: Record<string, DownloadStatus>
-    nowPlaying: NowPlaying | null
+    downloadStatus: Record<string, DownloadStatus>,
+    nowPlaying: NowPlaying | null,
 }
 
 export const defaultReplication: ReplicationModel = {
     isPlaying: false,
     mediaDuration: 10,
     mediaTime: 0,
-    pipelineOrder: [],
-    pipelineFilms: {},
     downloadStatus: {},
-    nowPlaying: null
+    nowPlaying: null,
 }

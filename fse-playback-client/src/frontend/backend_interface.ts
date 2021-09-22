@@ -1,6 +1,7 @@
 import { BackendAPI, Creds, defaultReplication, ReplicationModel } from '../util';
 import { EventEmitter } from 'events';
 import { Replicator } from 'fse-shared/dist/replication'
+import { LitePlaylist } from '../api/Playlist';
 const api: BackendAPI = (window as any).backendAPI;
 
 class IpcReplicator<T extends object> extends Replicator<T> {
@@ -80,6 +81,13 @@ module backendInterface {
         api.on('mediaError', listener);
     }
     
+    export async function getPlaylists() {
+        return await api.invoke('getPlaylists') as Record<string, LitePlaylist>
+    }
+
+    export function onUpdatePlaylist(listener: (id: string, value: LitePlaylist) => void) {
+        api.on('updatePlaylist', listener);
+    }
 }
 
 export default backendInterface;

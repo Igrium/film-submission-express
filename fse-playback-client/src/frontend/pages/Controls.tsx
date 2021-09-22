@@ -4,17 +4,17 @@ import { Alert, Button, Card, Col, Container, Form, FormControl, ListGroup, Row 
 import { List } from 'react-bootstrap-icons'
 import { NowPlaying, ReplicationModel } from '../../util'
 import backendInterface from '../backend_interface'
-import PipelinePlaylistView from '../components/PipelinePlaylistView'
+import PlaylistView from '../components/PlaylistView'
 import PlaybackControls from '../components/PlaybackControls'
 import { AlertState } from '../reactUtils'
+import { LitePlaylist } from '../../api/Playlist'
 
 interface IState {
     mediaTime: number,
     mediaDuration: number,
     playing: boolean,
-    pipelineOrder: string[],
-    pipelineFilms: Record<string, FilmInfo>,
     nowPlaying: NowPlaying | null,
+    playlists: Record<string, LitePlaylist>,
     alert?: AlertState
 }
 
@@ -26,9 +26,8 @@ export default class Controls extends Component<{}, IState> {
             mediaTime: 0,
             mediaDuration: 1,
             playing: false,
-            pipelineOrder: [],
-            pipelineFilms: {},
-            nowPlaying: null
+            nowPlaying: null,
+            playlists: {}
         }
     }
     
@@ -42,14 +41,24 @@ export default class Controls extends Component<{}, IState> {
             } });
             console.error(error);
         });
+
+        backendInterface.onUpdatePlaylist((id, value) => {
+            let playlists: Record<string, LitePlaylist> = {};
+            playlists[id] = value;
+            this.setState({
+                playlists: { ...this.state.playlists, ...playlists }
+            })
+        })
+
+        backendInterface.getPlaylists().then(playlists => {
+            this.setState({ playlists });
+        })
     }
 
     private updateState(data: Partial<ReplicationModel>) {
         if (data.mediaDuration) this.setState({ mediaDuration: data.mediaDuration });
         if (data.mediaTime) this.setState({ mediaTime: data.mediaTime });
         if (data.isPlaying != null) this.setState({ playing: data.isPlaying });
-        if (data.pipelineOrder) this.setState({ pipelineOrder: data.pipelineOrder });
-        if (data.pipelineFilms) this.setState({ pipelineFilms: data.pipelineFilms });
         if (data.nowPlaying !== undefined) {
             this.setState({ nowPlaying: data.nowPlaying });
         }
@@ -65,7 +74,7 @@ export default class Controls extends Component<{}, IState> {
     }
 
     render() {
-        const { mediaTime, mediaDuration, playing, pipelineOrder, pipelineFilms, alert } = this.state;
+        const { mediaTime, mediaDuration, playing, playlists, alert } = this.state;
 
         return (
             <Container>
@@ -84,16 +93,25 @@ export default class Controls extends Component<{}, IState> {
                 <Button className='mb-3' onClick={() => {
                     backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/fse-server/data/media/AtVsyaDfhr.mp4')
                 }}>Media Test</Button>
-                <Card>
-                    <Card.Header>Pipeline Film Playlist</Card.Header>
-                    <Card.Body>
-                        <PipelinePlaylistView order={pipelineOrder} films={pipelineFilms} />
-                    </Card.Body>
-                </Card>
+                {
+                    Object.keys(playlists).map(title => <PlaylistCard title={title} playlist={playlists[title]} />)
+                }
                 {
                     alert ? <Alert variant={alert.variant}>{alert.message}</Alert> : null
                 }
             </Container>
         )
     }
+    
+}
+
+function PlaylistCard(props: {title: string, playlist: LitePlaylist}) {
+    return (
+        <Card>
+            <Card.Header>{props.title}</Card.Header>
+            <Card.Body>
+                <PlaylistView playlist={props.playlist} />
+            </Card.Body>
+        </Card>
+    )
 }

@@ -74,4 +74,21 @@ export default abstract class Playlist {
     public getTitles(): Record<string, string> {
         return {};
     }
+
+    public getLite(): LitePlaylist {
+        return {
+            list: this.list,
+            head: this.head,
+            titles: this.getTitles()
+        }
+    }
+}
+
+/**
+ * A simple, non-mutable representation of a playlist.
+ */
+export interface LitePlaylist {
+    list: string[],
+    head: number,
+    titles: Record<string, string>
 }

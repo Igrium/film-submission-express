@@ -4,6 +4,7 @@ import MediaPlayer from './MediaPlayer';
 import ServerInterface from './ServerInterface';
 import { Replicator } from 'fse-shared/dist/replication';
 import LocalMediaManager from './LocalMediaManager';
+import Playlist, { LitePlaylist } from '../api/Playlist';
 
 module backend {
     export let server: ServerInterface | null = null;
@@ -11,6 +12,7 @@ module backend {
     export let mediaPlayer: MediaPlayer | null = null;
     export let replicator: Replicator<ReplicationModel>
     export let mediaManager: LocalMediaManager | null;
+    export const playlists: Record<string, Playlist> = {};
 
     class IpcReplicator<T extends object> extends Replicator<T> {
 
@@ -75,11 +77,25 @@ module backend {
             })
         }
     }
+
+    ipcMain.handle('getPlaylists', () => {
+        const lite: Record<string, LitePlaylist> = {};
+        Object.keys(playlists).forEach(key => {
+            lite[key] = playlists[key].getLite();
+        })
+        return lite;
+    });
+
+    export function updatePlaylist(id: string, value: Playlist) {
+        playlists[id] = value;
+        mainWindow.webContents.send('updatePlaylist', id, value.getLite());
+    }
  
     ipcMain.handle('login', async (event, creds: Creds) => {
         try {
             await login(creds);
         } catch (err) {
+            console.error(err);
             return err;
         }
     })
@@ -91,16 +107,17 @@ module backend {
     export async function login(creds: Creds) {
         server = await ServerInterface.connect(creds);
         mediaManager = new LocalMediaManager(server, './media');
+        const playbill = server.playbill;
+        playlists.playbill = playbill
+
         server.playbill.onSetOrder(order => {
-            replicator.setData({ pipelineOrder: order });
+            updatePlaylist('playbill', playbill);
         })
         server.playbill.onModifyFilm((id, data) => {
-            replicator.setData({ pipelineFilms: server?.playbill.films });
+            updatePlaylist('playbill', playbill);
         })
         console.log(server.playbill);
         replicator.setData({
-            pipelineFilms: server.playbill.films,
-            pipelineOrder: server.playbill.order,
             downloadStatus: mediaManager.getAllDownloadStatus()
         })
         mediaManager.onUpdateDownloadStatus((id, status) => {

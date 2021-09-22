@@ -15,7 +15,7 @@ export default class LocalMediaManager {
     public readonly mediaFolder: string;
     public readonly installedFilms: string[] = [];
     public readonly emitter = new EventEmitter();
-    private handles: Record<string, DownloadHandle>;
+    private handles: Record<string, DownloadHandle> = {};
     
     private _isDownloading: boolean = false;
 
