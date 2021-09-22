@@ -53,6 +53,7 @@ export class ClientPlayBill extends Playlist {
 
     public set head(head: number) {
         this._head = head;
+        this.connection.socket.emit('setHead', head);
     }
 
     getTitles() {

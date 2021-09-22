@@ -47,6 +47,7 @@ export default class PlaybackServer {
     private _io: SocketServer
     private _playbill: PlayBill;
     private _downloadQueue: string[] = [];
+    private _head = 0;
 
     /**
      * Construct a playback server.
@@ -88,6 +89,10 @@ export default class PlaybackServer {
         return this._downloadQueue;
     }
 
+    public get head() {
+        return this._head;
+    }
+
     private initConnection(socket: Socket) {
         console.log(`New socket connection ${socket.id}`)
 
@@ -106,6 +111,11 @@ export default class PlaybackServer {
         socket.on('getOrder', (callback: (order: string[]) => void) => {
             callback(this.playbill.order);
         });
+
+        socket.on('setHead', (head: number) => {
+            this._head = head;
+            console.log(`Client is playing film at index ${head}`) // TESTING ONLY
+        })
 
         pipeline.downloadingFilms = {}; // We need to wait for the client to tell us about its download status.
         socket.on('updateDownloadStatus', (status: Record<string, DownloadStatus>) => {
