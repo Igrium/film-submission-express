@@ -1,10 +1,12 @@
 import { BrowserWindow, ipcMain } from 'electron';
 import EventEmitter from 'events';
+import Playlist from '../api/Playlist';
 
 export default class MediaPlayer {
     private _window: BrowserWindow;
     private _emitter = new EventEmitter()
     private _isPlaying: boolean;
+    private _playlist: Playlist | null;
 
     constructor() {
         this._window = new BrowserWindow({
@@ -40,6 +42,10 @@ export default class MediaPlayer {
             ipcMain.off('player.timeUpdate', timeUpdate);
             this.emitter.emit('closed');
         })
+
+        this.onMediaFinished(() => {
+            this.skip();
+        })
     }
 
     public get window() {
@@ -55,6 +61,14 @@ export default class MediaPlayer {
     }
 
     /**
+     * The currently active playlist.
+     */
+    public get playlist() {
+        return this._playlist;
+    }
+    
+
+    /**
      * Query the media render process for whether the media is playing or not.
      */
     public getIsPlaying() {
@@ -67,6 +81,11 @@ export default class MediaPlayer {
                 reject(error);
             }
         })
+    }
+
+    public stop() {
+        this._playlist = null;
+        this.displayHTML('');
     }
 
     public setPlaying(playing: boolean) {
@@ -117,21 +136,46 @@ export default class MediaPlayer {
     }
 
     /**
+     * Load a playlist and play an item from it.
+     * @param playlist Playlist to load.
+     * @param index Start at this index. Defaults to current playlist head.
+     */
+    public loadPlaylist(playlist: Playlist, index=playlist.head) {
+        this._playlist = playlist;
+        playlist.displayFunction(playlist.play(index), this);
+    }
+
+    /**
      * Display an image in the player.
      * @param image Image URL.
+     * @param clearPlaylist Clear the current playlist. Defaults to true.
      */
-    public displayImage(image: string) {
+    public displayImage(image: string, clearPlaylist=true) {
         this.window.webContents.send('displayImage', image);
+        if (clearPlaylist) this._playlist = null;
+    }
+
+    /**
+     * Skip to the next entry in the playlist.
+     */
+    public skip() {
+        if (this.playlist && this.playlist.hasNext) {
+            this.playlist.displayFunction(this.playlist.next(), this);
+        } else {
+            this.stop();
+        }
     }
 
     /**
      * Display a video in the player.
      * @param video Video URL.
+     * @param clearPlaylist Clear the current playlist. Defaults to true.
      */
-    public displayVideo(video: string) {
+    public displayVideo(video: string, clearPlaylist=true) {
         console.log(`Playing video from ${video}`);
         this.window.webContents.send('displayVideo', video);
         this._isPlaying = true;
+        if (clearPlaylist) this._playlist = null;
         this.emitter.emit('setIsPlaying', true);
     }
 
@@ -140,8 +184,10 @@ export default class MediaPlayer {
      * 
      * **Warning:** only use with trusted sources. Potential script tags are NOT sandboxed.
      * @param html HTML content to display.
+     * @param clearPlaylist Clear the current playlist. Defaults to true.
      */
-    public displayHTML(html: string) {
+    public displayHTML(html: string, clearPlaylist=true) {
         this.window.webContents.send('displayHTML', html);
+        if (clearPlaylist) this._playlist = null;
     }
 }

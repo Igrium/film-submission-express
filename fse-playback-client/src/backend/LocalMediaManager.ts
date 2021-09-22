@@ -3,6 +3,7 @@ import path from 'path';
 import fs from 'fs';
 import { DownloadState, DownloadStatus } from 'fse-shared/dist/meta'
 import EventEmitter from 'events';
+import url from 'url';
 
 interface DownloadHandle {
     length: number,
@@ -50,6 +51,13 @@ export default class LocalMediaManager {
     get isDownloading() {
         return this._isDownloading;
     }
+
+    /**
+     * Get the expected local path for a given film ID.
+     */
+    getLocalMediaPath(id: string) {
+        return path.resolve(this.mediaFolder, id+'.mp4');
+    }
     
     async download(id: string) {
         try {
@@ -58,7 +66,7 @@ export default class LocalMediaManager {
             const url = new URL(`/api/media?id=${id}`, this.connection.hostname);
             console.log(`Downloading film from ${url}`);
     
-            const file = path.resolve(this.mediaFolder, id+'.mp4');
+            const file = this.getLocalMediaPath(id);
             if (fs.existsSync(file)) {
                 console.warn("Film is already installed. Aborting.");
             };
@@ -149,5 +157,18 @@ export default class LocalMediaManager {
      */
     updateDownloadQueue() {
         this.connection.socket.emit('setDownloadQueue', this.downloadQueue);
+    }
+
+    /**
+     * Get the local URL for a film.
+     * @param id ID of the film.
+     * @returns Local URL.
+     * @throws If the film doesn't exist or is still downloading.
+     */
+    public getLocalMedia(id: string) {
+        if (this.getDownloadStatus(id).state !== DownloadState.Ready) {
+            throw new Error(`Local media for '${id}' is nonexistant or incomplete.`);
+        }
+        return url.pathToFileURL(this.getLocalMediaPath(id));
     }
 }

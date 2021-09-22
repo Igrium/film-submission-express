@@ -91,7 +91,7 @@ export default class Controls extends Component<{}, IState> {
                         backendInterface.togglePlayback();
                     }} />
                 <Button className='mb-3' onClick={() => {
-                    backendInterface.loadVideoFile('file:///F:/Documents/Programming/film-submission-express/fse-server/data/media/AtVsyaDfhr.mp4')
+                    backendInterface.startPlaylist('playbill')
                 }}>Media Test</Button>
                 {
                     Object.keys(playlists).map(title => <PlaylistCard title={title} playlist={playlists[title]} />)

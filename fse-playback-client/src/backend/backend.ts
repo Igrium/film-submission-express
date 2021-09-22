@@ -154,6 +154,14 @@ module backend {
             mediaPlayer.toggle();
         }
     })
+
+    ipcMain.on('startPlaylist', (event, name: string) => {
+        if (!(name in playlists)) {
+            throw new Error(`No playlist named ${name}`);
+        }
+        if (!mediaPlayer) throw new Error("No media player.");
+        mediaPlayer?.loadPlaylist(playlists[name]);
+    })
 }
 
 export default backend;

@@ -1,3 +1,5 @@
+import MediaPlayer from "../backend/MediaPlayer";
+
 /**
  * Represents a playlist of media that the media player can play.
  * Each entry in the playlist is denoted by a a string, and each
@@ -75,6 +77,10 @@ export default abstract class Playlist {
         return {};
     }
 
+    /**
+     * Get a serializable representation of this playlist.
+     * @returns Lite playlist.
+     */
     public getLite(): LitePlaylist {
         return {
             list: this.list,
@@ -82,6 +88,18 @@ export default abstract class Playlist {
             titles: this.getTitles()
         }
     }
+
+    /**
+     * Display a media entry in the given media player. This function
+     * is automatically called by the media player when playing a playlist.
+     * Should generally not be called manually.
+     * 
+     * *Should use `clearPlaylist=false` in all function calls to the media player.*
+     * @param id ID of the entry to display as represented within the playlist.
+     * @param player Media player to display on.
+     */
+    public abstract displayFunction(id: string, player: MediaPlayer): void;
+    
 }
 
 /**

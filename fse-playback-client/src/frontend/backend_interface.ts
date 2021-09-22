@@ -88,6 +88,10 @@ module backendInterface {
     export function onUpdatePlaylist(listener: (id: string, value: LitePlaylist) => void) {
         api.on('updatePlaylist', listener);
     }
+
+    export function startPlaylist(name: string) {
+        api.send('startPlaylist', name);
+    }
 }
 
 export default backendInterface;

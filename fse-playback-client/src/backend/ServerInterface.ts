@@ -5,11 +5,15 @@ import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
 import EventEmitter from 'events';
 import { Replicator } from 'fse-shared/dist/replication';
 import Playlist from '../api/Playlist';
+import MediaPlayer from './MediaPlayer';
+import backend from './backend';
+import LocalMediaManager from './LocalMediaManager';
 
 /**
  * Client proxy of playbill.
  */
 export class ClientPlayBill extends Playlist {
+    
     readonly emitter = new EventEmitter;
     films: Record<string, FilmInfo> = {}
     order: string[] = [];
@@ -63,6 +67,13 @@ export class ClientPlayBill extends Playlist {
         })
         return titles;
     }
+
+    public displayFunction(id: string, player: MediaPlayer): void {
+        if (!backend.mediaManager) {
+            throw new Error("Can't display media because the media manager is nonexistant.");
+        }
+        player.displayVideo(backend.mediaManager.getLocalMedia(id).toString(), false);
+    }
 }
 
 export class SocketClientReplicator<T extends object> extends Replicator<T> {
@@ -94,13 +105,14 @@ export default class ServerInterface {
     private _socket: Socket
     private _creds: Creds;
     private _hostname: string
-    readonly playbill = new ClientPlayBill(this);
+    readonly playbill;
     static client = axios.create({ timeout: 5000 });
 
     constructor(socket: Socket, hostname: string, credentials: Creds) {
         this._socket = socket;
         this._hostname = hostname;
         this._creds = credentials;
+        this.playbill = new ClientPlayBill(this);
         this.initConnection();
     }
     
