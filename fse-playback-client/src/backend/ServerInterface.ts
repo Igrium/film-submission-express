@@ -4,22 +4,63 @@ import axios from 'axios';
 import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
 import EventEmitter from 'events';
 import { Replicator } from 'fse-shared/dist/replication';
+import Playlist from '../api/Playlist';
 
 /**
- * Client proxy of playbill. DO NOT WRITE TO DIRECTLY!
- * Use REST API to contact the server instead.
+ * Client proxy of playbill.
  */
-export class ClientPlayBill {
+export class ClientPlayBill extends Playlist {
     readonly emitter = new EventEmitter;
     films: Record<string, FilmInfo> = {}
     order: string[] = [];
+    private _head = 0;
+    public readonly connection: ServerInterface;
 
+    constructor(connection: ServerInterface) {
+        super();
+        this.connection = connection;
+    }
+
+    /**
+     * Called when the client is notified that a film's metadata has been updated.
+     */
     onModifyFilm(listener: (id: string, data: FilmInfo) => void) {
         this.emitter.on('modifyFilm', listener);
     }
 
+    /**
+     * Called when the client is notified that the film order has been updated.
+     */
     onSetOrder(listener: (order: string[]) => void) {
         this.emitter.on('setOrder', listener);
+    }
+
+    public get list(): string[] {
+        return this.order;
+    }
+
+    public async setList(list: string[]) {
+        const address = new URL('/api/order', this.connection.credentials.address)
+        let res = await ServerInterface.client.post(address.toString(), list, { withCredentials: true })
+        if (res.status >= 400) {
+            throw new Error(`Server responded with code ${res.status}.`);
+        }
+    }
+
+    public get head(): number {
+        return this._head;
+    }
+
+    public set head(head: number) {
+        this._head = head;
+    }
+
+    getTitles() {
+        let titles: Record<string, string> = {};
+        Object.keys(this.films).forEach(id => {
+            titles[id] = this.films[id].title;
+        })
+        return titles;
     }
 }
 
@@ -52,7 +93,7 @@ export default class ServerInterface {
     private _socket: Socket
     private _creds: Creds;
     private _hostname: string
-    readonly playbill = new ClientPlayBill();
+    readonly playbill = new ClientPlayBill(this);
     static client = axios.create({ timeout: 5000 });
 
     constructor(socket: Socket, hostname: string, credentials: Creds) {
