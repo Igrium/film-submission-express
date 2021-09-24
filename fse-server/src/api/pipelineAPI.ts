@@ -1,7 +1,9 @@
 import { Router } from 'express';
+import { playbackServer } from '../app';
 import { Config } from '../config';
 import pipeline from '../pipeline';
 import PlayBill from '../playbill';
+import auth from './auth';
 
 export default function pipelineAPI(config: Config, playbill: PlayBill) {
     const router = Router();

@@ -48,6 +48,7 @@ export default class PlaybackServer {
     private _playbill: PlayBill;
     private _downloadQueue: string[] = [];
     private _head = 0;
+    private _connection: Socket | null = null;
 
     /**
      * Construct a playback server.
@@ -93,8 +94,19 @@ export default class PlaybackServer {
         return this._head;
     }
 
+    /**
+     * The currently connected playback client.
+     */
+    public get connection() {
+        return this._connection;
+    }
+
     private initConnection(socket: Socket) {
         console.log(`New socket connection ${socket.id}`)
+
+        if (this.connection) {
+            socket.disconnect();
+        }
 
         const session = (socket.request as express.Request).session;
         console.log(`Saving sid ${socket.id} in session ${session.id}`);
@@ -117,12 +129,18 @@ export default class PlaybackServer {
             console.log(`Client is playing film at index ${head}`) // TESTING ONLY
         })
 
+        socket.on('disconnect', () => {
+            this._connection = null;
+        })
+
         pipeline.downloadingFilms = {}; // We need to wait for the client to tell us about its download status.
         socket.on('updateDownloadStatus', (status: Record<string, DownloadStatus>) => {
             Object.keys(status).forEach(id => {
                 pipeline.downloadingFilms[id] = status[id];
             })
         })
+
+        this._connection = socket
     }
     
     private initListeners() {

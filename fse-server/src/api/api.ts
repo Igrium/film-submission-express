@@ -9,6 +9,7 @@ import { initFilmAPI } from "./films.js";
 import pipelineAPI from "./pipelineAPI";
 import auth from './auth.js';
 import { userDB } from '../app.js';
+import playbackAPI from "./playbackAPI.js";
 
 /**
  * Init an express app with a playbill.
@@ -22,6 +23,7 @@ export function initAPI(config: Config, playbill: PlayBill) {
     router.use('/api/users', auth.authAPI(userDB));
     router.use('/api/films', initFilmAPI(config, playbill));
     router.use('/api/pipeline', pipelineAPI(config, playbill));
+    router.use('/api/playback', playbackAPI())
 
     router.get('/api/media', (req, res) => {
         const id = req.query.id as string;

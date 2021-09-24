@@ -32,8 +32,8 @@ async function start() {
     auth.initAuth(userDB, app);
     app.use('/', initAPI(config, playbill));
 
-    app.use('/submit', express.static(path.join(__dirname, '../../fse-submission-portal/build/')));
-    app.use('/admin', express.static(path.join(__dirname, '../../admin-panel/build/')));
+    app.use('/submit/', express.static(path.join(__dirname, '../../fse-submission-portal/build/')));
+    app.use('/admin/', express.static(path.join(__dirname, '../../admin-panel/build/')));
 
     playbackServer = new PlaybackServer(http, playbill);
 
