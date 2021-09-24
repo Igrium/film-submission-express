@@ -90,6 +90,11 @@ module backend {
         playlists[id] = value;
         mainWindow.webContents.send('updatePlaylist', id, value.getLite());
     }
+
+    ipcMain.handle('getDownloadStatuses', () => {
+        if (!mediaManager) throw new Error('No media manager.');
+        return mediaManager.getAllDownloadStatus();
+    });
  
     ipcMain.handle('login', async (event, creds: Creds) => {
         try {

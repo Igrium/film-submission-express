@@ -1,4 +1,4 @@
-import { FilmInfo } from 'fse-shared/dist/meta'
+import { DownloadState, DownloadStatus, FilmInfo } from 'fse-shared/dist/meta'
 import React, { Component } from 'react'
 import { Alert, Button, Card, Col, Container, Form, FormControl, ListGroup, Row } from 'react-bootstrap'
 import { List } from 'react-bootstrap-icons'
@@ -15,6 +15,7 @@ interface IState {
     playing: boolean,
     nowPlaying: NowPlaying | null,
     playlists: Record<string, LitePlaylist>,
+    downloadStatus: Record<string, DownloadStatus>,
     alert?: AlertState
 }
 
@@ -27,6 +28,7 @@ export default class Controls extends Component<{}, IState> {
             mediaDuration: 1,
             playing: false,
             nowPlaying: null,
+            downloadStatus: {},
             playlists: {}
         }
     }
@@ -62,6 +64,7 @@ export default class Controls extends Component<{}, IState> {
         if (data.nowPlaying !== undefined) {
             this.setState({ nowPlaying: data.nowPlaying });
         }
+        if (data.downloadStatus) this.setState({ downloadStatus: data.downloadStatus });
     }
 
     private generateNowPlaying() {
@@ -74,7 +77,7 @@ export default class Controls extends Component<{}, IState> {
     }
 
     render() {
-        const { mediaTime, mediaDuration, playing, playlists, alert } = this.state;
+        const { mediaTime, mediaDuration, playing, playlists, alert, downloadStatus } = this.state;
 
         return (
             <Container>
@@ -94,7 +97,7 @@ export default class Controls extends Component<{}, IState> {
                     backendInterface.startPlaylist('playbill')
                 }}>Media Test</Button>
                 {
-                    Object.keys(playlists).map(title => <PlaylistCard title={title} playlist={playlists[title]} />)
+                    Object.keys(playlists).map(title => <PlaylistCard title={title} playlist={playlists[title]} downloadStatus={downloadStatus} />)
                 }
                 {
                     alert ? <Alert variant={alert.variant}>{alert.message}</Alert> : null
@@ -105,12 +108,26 @@ export default class Controls extends Component<{}, IState> {
     
 }
 
-function PlaylistCard(props: {title: string, playlist: LitePlaylist}) {
+function PlaylistCard(props: {title: string, playlist: LitePlaylist, downloadStatus: Record<string, DownloadStatus>}) {
+
+    let progressFunction: ((id: string) => number) | undefined;
+    if (props.title === 'playbill') {
+        progressFunction = (id) => {
+            if (id in props.downloadStatus) {
+                let status = props.downloadStatus[id];
+                if (status.state == DownloadState.Ready) return 1;
+                return status.percent ? status.percent : 0;
+            } else {
+                return 0;
+            }
+        }
+    }
+
     return (
         <Card>
             <Card.Header>{props.title}</Card.Header>
             <Card.Body>
-                <PlaylistView playlist={props.playlist} />
+                <PlaylistView playlist={props.playlist} progressFunction={progressFunction} />
             </Card.Body>
         </Card>
     )

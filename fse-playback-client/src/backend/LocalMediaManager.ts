@@ -52,7 +52,7 @@ export default class LocalMediaManager {
         return this._isDownloading;
     }
 
-    /**
+    /** 
      * Get the expected local path for a given film ID.
      */
     getLocalMediaPath(id: string) {
