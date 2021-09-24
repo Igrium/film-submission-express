@@ -107,6 +107,7 @@ export default class ServerInterface {
     private _hostname: string
     readonly playbill;
     static client = axios.create({ timeout: 5000 });
+    readonly emitter = new EventEmitter();
 
     constructor(socket: Socket, hostname: string, credentials: Creds) {
         this._socket = socket;
@@ -167,7 +168,10 @@ export default class ServerInterface {
         let result = await Promise.all([filmPromise, orderPromise]);
         this.playbill.films = result[0];
         this.playbill.order = result[1];
+
+        this.emitter.emit('sync');
     }
+    
     
     private async getFilms() {
         return new Promise<Record<string, FilmInfo>>((resolve, reject) => {
@@ -191,6 +195,15 @@ export default class ServerInterface {
                 reject(e);
             }
         })
+    }
+
+    /**
+     * Get a URL relative to the server address. Primarily used for API calls.
+     * @param url Relative URL.
+     * @returns The full URL.
+     */
+    public resolveURL(url: string) {
+        return new URL(url, this.hostname).toString();
     }
 
     /**

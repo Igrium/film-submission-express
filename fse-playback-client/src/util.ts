@@ -25,6 +25,8 @@ export interface ReplicationModel {
     isPlaying: boolean,
     downloadStatus: Record<string, DownloadStatus>,
     nowPlaying: NowPlaying | null,
+    downloadQueue: string[],
+    titles: Record<string, string>
 }
 
 export const defaultReplication: ReplicationModel = {
@@ -33,4 +35,6 @@ export const defaultReplication: ReplicationModel = {
     mediaTime: 0,
     downloadStatus: {},
     nowPlaying: null,
+    downloadQueue: [],
+    titles: {}
 }

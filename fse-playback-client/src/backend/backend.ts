@@ -120,8 +120,12 @@ module backend {
         })
         server.playbill.onModifyFilm((id, data) => {
             updatePlaylist('playbill', playbill);
+            const titles = {} as Record<string, string>;
+            Object.keys(playbill).forEach(id => {
+                titles[id] = playbill.films[id].title;
+            })
+            replicator.setData({ titles });
         })
-        console.log(server.playbill);
         replicator.setData({
             downloadStatus: mediaManager.getAllDownloadStatus()
         })
@@ -130,6 +134,10 @@ module backend {
             states[id] = status;
             replicator.setData({ downloadStatus: states });
         })
+        mediaManager.onUpdateDownloadQueue(queue => {
+            replicator.setData({ downloadQueue: queue });
+        })
+        mediaManager.queueMissing();
         return server;
     }
 

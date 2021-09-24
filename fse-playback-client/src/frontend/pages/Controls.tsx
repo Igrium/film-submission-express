@@ -16,6 +16,7 @@ interface IState {
     nowPlaying: NowPlaying | null,
     playlists: Record<string, LitePlaylist>,
     downloadStatus: Record<string, DownloadStatus>,
+    downloadQueue: string[],
     alert?: AlertState
 }
 
@@ -29,6 +30,7 @@ export default class Controls extends Component<{}, IState> {
             playing: false,
             nowPlaying: null,
             downloadStatus: {},
+            downloadQueue: [],
             playlists: {}
         }
     }
@@ -77,8 +79,8 @@ export default class Controls extends Component<{}, IState> {
     }
 
     render() {
-        const { mediaTime, mediaDuration, playing, playlists, alert, downloadStatus } = this.state;
-
+        const { mediaTime, mediaDuration, playing, playlists, alert, downloadStatus, downloadQueue } = this.state;
+        console.log(downloadQueue) // TESTING ONLY
         return (
             <Container>
                 <Row className='mt-3 align-items-center'>
@@ -99,6 +101,22 @@ export default class Controls extends Component<{}, IState> {
                 {
                     Object.keys(playlists).map(title => <PlaylistCard title={title} playlist={playlists[title]} downloadStatus={downloadStatus} />)
                 }
+                <span className="mt-3">Downloads</span>
+                <ListGroup variant='flush'>
+                    {downloadQueue.map(id => {
+                        let title;
+                        if (id in backendInterface.replicator.data.titles) {
+                            title = backendInterface.replicator.data.titles[id];
+                        } else {
+                            title = null;
+                        }
+                        return (
+                            <ListGroup.Item key={id}>
+                                <b>{title}</b> ({id})
+                            </ListGroup.Item>
+                        )
+                    })}
+                </ListGroup>
                 {
                     alert ? <Alert variant={alert.variant}>{alert.message}</Alert> : null
                 }
@@ -124,7 +142,7 @@ function PlaylistCard(props: {title: string, playlist: LitePlaylist, downloadSta
     }
 
     return (
-        <Card>
+        <Card className='mb-3'>
             <Card.Header>{props.title}</Card.Header>
             <Card.Body>
                 <PlaylistView playlist={props.playlist} progressFunction={progressFunction} />

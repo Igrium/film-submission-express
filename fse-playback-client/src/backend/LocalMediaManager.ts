@@ -1,9 +1,10 @@
 import ServerInterface, { ClientPlayBill } from './ServerInterface';
 import path from 'path';
 import fs from 'fs';
-import { DownloadState, DownloadStatus } from 'fse-shared/dist/meta'
+import { DownloadState, DownloadStatus, UploadState } from 'fse-shared/dist/meta'
 import EventEmitter from 'events';
 import url from 'url';
+import backend from './backend';
 
 interface DownloadHandle {
     length: number,
@@ -28,6 +29,7 @@ export default class LocalMediaManager {
 
         connection.socket.on('setDownloadQueue', queue => {
             this.downloadQueue = queue;
+            this.emitter.emit('updateDownloadQueue', this.downloadQueue);
             if (!this.isDownloading) {
                 this.beginDownload();
             }
@@ -58,8 +60,65 @@ export default class LocalMediaManager {
     getLocalMediaPath(id: string) {
         return path.resolve(this.mediaFolder, id+'.mp4');
     }
+
+    /**
+     * Add a film to the download queue and start downloading.
+     * @param id Film ID.
+     */
+    queueDownload(id: string) {
+        if (!(id in this.connection.playbill.films)) {
+            throw new Error(`Unable to download nonexistant film: ${id}`);
+        }
+        if (id in this.downloadQueue) {
+            console.warn(`Film '${id}' is already queued for download!'`);
+        }
+
+        this.downloadQueue.push(id);
+        console.log(`Added '${id}' to download queue.'`)
+        this.updateDownloadQueue();
+        if (!this.isDownloading) {
+            this.beginDownload();
+        }
+    }
+
+    /**
+     * Iterate through all the processed films and queue them for download if they aren't installed locally.
+     * 
+     * Starts by going through the program in order, as those are the priority. Then, it downloads the rest
+     * of the processed films, regardless of whether they've been approved.
+     */
+    queueMissing() {
+        console.log("Scanning for missing films...");
+        const attemptDownload = (id: string) => {
+            if (this.getDownloadStatus(id).state === DownloadState.Waiting
+                && !(id in this.downloadQueue)
+                && this.connection.playbill.films[id].uploadState >= UploadState.ProcessingPreview) {
+                    this.downloadQueue.push(id);
+                    console.log(`Added '${id}' to download queue.'`)
+                }
+        }
+
+        this.connection.playbill.order.forEach(id => {
+            attemptDownload(id);
+        })
+
+        Object.keys(this.connection.playbill.films).forEach(id => {
+            attemptDownload(id);
+        })
+        this.beginDownload();
+    }
     
+    /**
+     * Download a film from the server.
+     * @param id Film ID.
+     * @returns A promise that rejects if there's an error.
+     */
     async download(id: string) {
+        if (id in this.installedFilms) {
+            console.warn(`Film ${id} has already been downloaded.`);
+            return;
+        }
+
         try {
             this._isDownloading = true;       
 
@@ -96,16 +155,23 @@ export default class LocalMediaManager {
             throw error;
         }
     }
-
+    
+    /**
+     * Begin downloading the contents of the download queue.
+     * @returns A promise that returns when the queue is empty.
+     */
     async beginDownload() {
+        if (this.isDownloading) return;
+        console.log("Begining queued download...")
         while (this.downloadQueue.length !== 0) {
             const film = this.downloadQueue[0];
             try {
                 await this.download(film);
             } catch (err) {
-                console.log(`Unable to download film '${film}'. ${err}`);
+                console.error(`Unable to download film '${film}'. ${err}`);
             }
             this.downloadQueue.shift();
+            this.updateDownloadQueue();
         }
     }
 
@@ -144,6 +210,10 @@ export default class LocalMediaManager {
         return Object.keys(this.handles);
     }
     
+    /**
+     * Called whenever the download status for a film has changed.
+     * @param listener Event listener.
+     */
     onUpdateDownloadStatus(listener: (id: string, status: DownloadStatus) => void) {
         this.emitter.on('updateDownloadStatus', listener);
     }
@@ -153,10 +223,20 @@ export default class LocalMediaManager {
     }
 
     /**
+     * Called when the download queue is updated for any reason.
+     * @param listener Event listener.
+     */
+    onUpdateDownloadQueue(listener: (queue: string[]) => void) {
+        this.emitter.on('updateDownloadQueue', listener);
+    }
+
+    /**
      * Send the server the current copy of the download queue.
+     * Should be called every time the `downloadQueue` array is updated.
      */
     updateDownloadQueue() {
         this.connection.socket.emit('setDownloadQueue', this.downloadQueue);
+        this.emitter.emit('updateDownloadQueue', this.downloadQueue);
     }
 
     /**

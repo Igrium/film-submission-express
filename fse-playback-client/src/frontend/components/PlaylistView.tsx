@@ -17,7 +17,7 @@ export default function PlaylistView(props: IProps) {
                 if (id in props.playlist.titles) {
                     title = props.playlist.titles[id]
                 }
-                return <FilmEntry id={id} title={title} progress={
+                return <FilmEntry key={id} id={id} title={title} progress={
                     props.progressFunction ? props.progressFunction(id) : undefined
                 } />
             })}
@@ -27,9 +27,10 @@ export default function PlaylistView(props: IProps) {
 
 function FilmEntry(props: { id: string, title: string, progress?: number }) {
     return (
-        <ListGroup.Item id={props.id}>
+        <ListGroup.Item key={props.id}>
             <b>{props.title}</b> ({props.id})
-            {props.progress !== undefined ? <ProgressBar now={props.progress * 100} /> : null}
+            {props.progress !== undefined ? <ProgressBar now={props.progress * 100}
+            label={`${props.progress * 100}%`} /> : null}
         </ListGroup.Item>
     )
 }

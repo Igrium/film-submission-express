@@ -135,6 +135,9 @@ export default class PlaybackServer {
         })
     }
 
+    /**
+     * Provide the client with a new copy of the download queue.
+     */
     refreshDownloadQueue() {
         this.io.emit('setDownloadQueue', this.downloadQueue);
     }
@@ -144,6 +147,10 @@ export default class PlaybackServer {
         this.refreshDownloadQueue();
     }
 
+    /**
+     * Add a film to the download queue.
+     * @param id Film ID
+     */
     public queueDownload(id: string) {
         this.downloadQueue.push(id);
         this.refreshDownloadQueue();
