@@ -8,6 +8,7 @@ import { FSEContext } from './Context'
 import Login from './pages/Login'
 import Profile from './pages/Profile'
 import AccountControl from './pages/AccountControl'
+import Playback from './pages/Playback'
 
 function Header() {
     const location = useLocation();
@@ -39,6 +40,9 @@ export default function App() {
                             </Route>
                             <Route path='/submissions'>
                                 <Submissions />
+                            </Route>
+                            <Route path='/playback'>
+                                <Playback />
                             </Route>
                             <Route path='/profile'>
                                 <ProfileView />

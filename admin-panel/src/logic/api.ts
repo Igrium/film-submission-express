@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { FilmInfo, TranscodeStatus } from 'fse-shared/src/meta';
+import { PlaybackConnectionInfo } from 'fse-shared/src/playback';
 import { SimpleUser, UserWithPassword } from 'fse-shared/src/users';
 
 /**
@@ -118,6 +119,10 @@ export module api {
 
     export async function getAllUserData() {
         return (await client.get('/api/users/all-data', { withCredentials: true })).data as Record<string, SimpleUser>;
+    }
+
+    export async function getPlaybackClient() {
+        return (await client.get('/api/playback', { withCredentials: true })).data as PlaybackConnectionInfo
     }
 }
 

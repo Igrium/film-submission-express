@@ -23,6 +23,9 @@ export default function Navbar() {
                         <li className='nav-item' key='submissions'>
                             <Link className='nav-link' to='submissions'>Submissions</Link>
                         </li>
+                        <li className='nav-item' key='playback'>
+                            <Link className='nav-link' to='playback'>Playback</Link>
+                        </li>
                         { context?.admin ? (
                             <li className='nav-item' key='accounts'>
                                 <Link className='nav-link' to='accounts'>Accounts</Link>
