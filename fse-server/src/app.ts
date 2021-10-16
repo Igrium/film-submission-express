@@ -33,7 +33,10 @@ async function start() {
     app.use('/', initAPI(config, playbill));
 
     app.use('/submit/', express.static(path.join(__dirname, '../../fse-submission-portal/build/')));
-    app.use('/admin/', express.static(path.join(__dirname, '../../admin-panel/build/')));
+    app.use('/admin/static', express.static(path.join(__dirname, '../../admin-panel/build//static')));
+    app.use('/admin/*', (req, res) => {
+        res.sendFile('index.html', {root: path.join(__dirname, '../../admin-panel/build/')});
+    })
 
     playbackServer = new PlaybackServer(http, playbill);
 
