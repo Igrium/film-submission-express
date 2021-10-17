@@ -26,15 +26,15 @@ export default function Navbar() {
                         <li className='nav-item' key='playback'>
                             <Link className='nav-link' to='playback'>Playback</Link>
                         </li>
-                        { context?.admin ? (
+                        { context.user?.admin ? (
                             <li className='nav-item' key='accounts'>
                                 <Link className='nav-link' to='accounts'>Accounts</Link>
                             </li>
                         ) : null }
                     </ul>
                 </div>
-                <DropdownButton id="username-button" title={context?.username ? context.username : ''}>
-                    <Dropdown.Item onClick={() => history.push(`/profile?username=${context?.username}`)}>Profile</Dropdown.Item>
+                <DropdownButton id="username-button" title={context?.user?.username ? context.user.username : ''}>
+                    <Dropdown.Item onClick={() => history.push(`/profile?username=${context.user?.username}`)}>Profile</Dropdown.Item>
                     <Dropdown.Item onClick={logout}>Log Out</Dropdown.Item>
                 </DropdownButton>
             </Container>

@@ -22,9 +22,8 @@ function ProfileView() {
 }
 
 export default function App() {
-    const context = useContext(FSEContext)
-    
-
+    const context = useContext(FSEContext);
+    const redirect = context.connected && (context.user === null);
     return (
         <Router basename='admin'>
             <Header />
@@ -33,7 +32,7 @@ export default function App() {
                     <Login />
                 </Route>
                 {
-                    context ? (
+                    !redirect ? (
                         <>
                             <Route path='/playbill'>
                                 Playbill
@@ -56,8 +55,6 @@ export default function App() {
                         </>
                     ) : <Redirect to='/login' />
                 }
-
-
             </Switch>
         </Router>
     )
