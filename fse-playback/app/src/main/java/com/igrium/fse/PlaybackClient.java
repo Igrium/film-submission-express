@@ -1,30 +1,56 @@
 package com.igrium.fse;
 
+import com.igrium.fse.ui.LoginScreen;
+import com.igrium.fse.ui.MainPanel;
+
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
 
 public class PlaybackClient extends Application {
+
+    private static PlaybackClient instance;
+
+    public static PlaybackClient getInstance() {
+        return instance;
+    }
 
     public static void main(String[] args) {
         launch(args);
     }
 
+    private Stage stage;
+    private MainPanel mainPanel;
+    private LoginScreen loginScreen;
+
+    public Stage getStage() {
+        return stage;
+    }
+
+    public MainPanel getMainPanel() {
+        return mainPanel;
+    }
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        primaryStage.setTitle("Hello World");
-        Button btn = new Button();
-        btn.setText("Say Hello World");
-        btn.setOnAction((event) -> {
-            System.out.println("Hello World!");
-        });
+        instance = this;
+        this.stage = primaryStage;
 
-        StackPane root = new StackPane();
-        root.getChildren().add(btn);
-        primaryStage.setScene(new Scene(root, 300, 250));
+        primaryStage.setTitle("Hello World");
+        mainPanel = MainPanel.open();
+
+        primaryStage.setScene(new Scene(mainPanel.getRoot()));
         primaryStage.show();
+
+        showLoginScreen();
+    }
+
+    public void showLoginScreen() {
+        loginScreen = LoginScreen.open(stage, connection -> {
+            System.out.println(connection.getHttpClient());
+            loginScreen.close();
+            loginScreen = null;
+        });
     }
     
 }
