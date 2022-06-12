@@ -42,8 +42,12 @@ namespace auth {
 
         // Passport
         passport.use(new LocalStrategy((username, password, done) => {
-            let user = database.getObject<User>(`/users/${username}`);
-            if (!user) return done(null, false);
+            let user: User;
+            try {
+                user = database.getObject<User>(`/users/${username}`);
+            } catch (e) {
+                return done(null, false);
+            }
             bcrypt.compare(password, user.password, (err, result) => {
                 if (err) return done(err);
                 if (result) {

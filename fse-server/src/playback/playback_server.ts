@@ -9,6 +9,7 @@ import PlayBill from '../playbill';
 import { PlaybackReplicationModel, Replicator } from 'fse-shared/dist/replication';
 import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
 import pipeline from '../pipeline';
+import { deprecate } from 'util';
 
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
@@ -132,6 +133,8 @@ export default class PlaybackServer {
         socket.on('disconnect', () => {
             this._connection = null;
         })
+
+        socket.emit('setFilmOrder', this.playbill.order)
 
         pipeline.downloadingFilms = {}; // We need to wait for the client to tell us about its download status.
         socket.on('updateDownloadStatus', (status: Record<string, DownloadStatus>) => {
