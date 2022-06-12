@@ -34,8 +34,7 @@ public class FailedLoginException extends RuntimeException {
     }
 
     public static FailedLoginException unknown(Throwable cause) {
-        return new FailedLoginException("An unknown exception occured trying to log in.",
-                Type.UNKNOWN, cause);
+        return new FailedLoginException(Type.UNKNOWN, cause);
     }
 
     public FailedLoginException(Type type, int statusCode) {

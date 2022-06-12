@@ -14,6 +14,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
@@ -34,12 +36,18 @@ public class LoginScreen {
     private TextField passwordField;
 
     @FXML
+    private Label errorLabel;
+
+    @FXML
+    private Button connectButton;
+
+    @FXML
     public void connect() {
         URI uri;
         try {
             uri = new URI(addressField.getText());
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            setErrorText("Address must be a valid URL.");
             return;
         }
 
@@ -48,8 +56,13 @@ public class LoginScreen {
             passwordField.getText()
         ));
 
-        future.handleAsync((val, e) -> {
+        connectButton.setDisable(true);
+        future.handleAsync((val, e) -> 
+        {
+            connectButton.setDisable(false);
             if (e != null) {
+                if (e.getCause() != null) e = e.getCause();
+                setErrorText(e.getMessage());
                 e.printStackTrace();
             } else if (onConnect != null) {
                 onConnect.accept(val);
@@ -57,6 +70,11 @@ public class LoginScreen {
 
             return null;
         }, Platform::runLater);
+        
+    }
+
+    public void setErrorText(String text) {
+        errorLabel.setText(text);
     }
 
     public void close() {

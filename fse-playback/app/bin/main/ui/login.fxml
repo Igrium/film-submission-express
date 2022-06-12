@@ -9,42 +9,37 @@
 <?import javafx.scene.layout.ColumnConstraints?>
 <?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.RowConstraints?>
-<?import javafx.scene.layout.VBox?>
 
-<VBox maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.igrium.fse.ui.LoginScreen">
+<GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.igrium.fse.ui.LoginScreen">
+   <columnConstraints>
+      <ColumnConstraints maxWidth="148.0" minWidth="10.0" prefWidth="105.33337402343751" />
+      <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="200.66666666666666" minWidth="10.0" prefWidth="195.33329264322916" />
+   </columnConstraints>
+   <rowConstraints>
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+      <RowConstraints vgrow="SOMETIMES" />
+      <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
+   </rowConstraints>
    <children>
-      <GridPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" VBox.vgrow="ALWAYS">
-         <columnConstraints>
-            <ColumnConstraints maxWidth="148.0" minWidth="10.0" prefWidth="105.33337402343751" />
-            <ColumnConstraints halignment="RIGHT" hgrow="ALWAYS" maxWidth="200.66666666666666" minWidth="10.0" prefWidth="195.33329264322916" />
-         </columnConstraints>
-         <rowConstraints>
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-            <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
-         </rowConstraints>
-         <children>
-            <Label text="Server Address" />
-            <TextField fx:id="addressField" prefHeight="25.0" prefWidth="185.0" promptText="http://" GridPane.columnIndex="1" />
-            <Label text="Username" GridPane.rowIndex="1" />
-            <Label text="Password" GridPane.rowIndex="2" />
-            <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
-            <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
-         </children>
-         <padding>
-            <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
-         </padding>
-      </GridPane>
-      <ButtonBar prefHeight="40.0" prefWidth="200.0">
-        <buttons>
-          <Button defaultButton="true" mnemonicParsing="false" onAction="#connect" text="Connect" />
-        </buttons>
+      <Label text="Server Address" />
+      <TextField fx:id="addressField" prefHeight="25.0" prefWidth="185.0" promptText="http://" GridPane.columnIndex="1" />
+      <Label text="Username" GridPane.rowIndex="1" />
+      <Label text="Password" GridPane.rowIndex="2" />
+      <TextField fx:id="usernameField" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+      <PasswordField fx:id="passwordField" GridPane.columnIndex="1" GridPane.rowIndex="2" />
+      <ButtonBar prefHeight="40.0" prefWidth="200.0" GridPane.columnSpan="2" GridPane.rowIndex="4">
+         <buttons>
+            <Button fx:id="connectButton" defaultButton="true" mnemonicParsing="false" onAction="#connect" text="Connect" />
+         </buttons>
          <padding>
             <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
          </padding>
       </ButtonBar>
+      <Label fx:id="errorLabel" textFill="RED" GridPane.columnSpan="2147483647" GridPane.rowIndex="3" />
    </children>
    <padding>
       <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
    </padding>
-</VBox>
+</GridPane>
