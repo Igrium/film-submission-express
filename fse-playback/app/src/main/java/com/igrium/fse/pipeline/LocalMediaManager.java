@@ -15,11 +15,18 @@ import java.util.Queue;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.locks.LockSupport;
 import java.util.function.BiConsumer;
-import java.util.function.Function;
+
+import com.igrium.fse.pipeline.FilmInfo.DownloadState;
+import com.igrium.fse.pipeline.FilmInfo.DownloadStatus;
 
 public class LocalMediaManager {
 
-    protected Function<String, URLConnection> downloadFunction;
+    public static interface DownloadFunction {
+        URLConnection openConnection(String id) throws IOException;
+    }
+    
+
+    protected DownloadFunction downloadFunction;
     protected BiConsumer<String, Throwable> exceptionHandler;
 
     protected List<BiConsumer<String, Float>> downloadUpdateListeners = new ArrayList<>();
@@ -29,6 +36,7 @@ public class LocalMediaManager {
 
     private Thread thread;
     private String downloading;
+    private float currentProgress;
 
     private Queue<String> downloadQueue = new ConcurrentLinkedQueue<>();
     
@@ -77,7 +85,7 @@ public class LocalMediaManager {
         LockSupport.unpark(thread);
     }
 
-    public void setDownloadFunction(Function<String, URLConnection> downloadFunction) {
+    public void setDownloadFunction(DownloadFunction downloadFunction) throws IllegalStateException {
         if (thread != null) {
             throw new IllegalStateException(
                 "Download function cannot be changed while manager is running.");
@@ -120,6 +128,16 @@ public class LocalMediaManager {
         return downloading;
     }
 
+    public DownloadStatus getDownloadStatus(String id) {
+        if (id.equals(downloading)) {
+            return new DownloadStatus(currentProgress, DownloadState.DOWNLOADING);
+        } else if (Files.exists(getLocalMediaFile(id))) {
+            return new DownloadStatus(1, DownloadState.READY);
+        } else {
+            return new DownloadStatus(0, DownloadState.WAITING);
+        }
+    }
+
     /**
      * Get the local file of a film.
      * @param id Film ID.
@@ -129,6 +147,11 @@ public class LocalMediaManager {
         return mediaPath.resolve(id + fileExtension);
     }
 
+    /**
+     * Get the local path of a film that is currently downloading.
+     * @param id Film ID.
+     * @return Local file path. File may or may not exist.
+     */
     public Path getDownloadPath(String id) {
         return mediaPath.resolve("downloading").resolve(id + fileExtension);
     }
@@ -148,7 +171,7 @@ public class LocalMediaManager {
             while ((id = downloadQueue.poll()) != null) {
                 downloading = id;
                 try {
-                    URLConnection connection = downloadFunction.apply(id);
+                    URLConnection connection = downloadFunction.openConnection(id);
                     long totalLength = connection.getContentLengthLong();
                     long totalBytesRead = 0;
 
@@ -163,7 +186,8 @@ public class LocalMediaManager {
                         totalBytesRead += bytesRead;
 
                         for (BiConsumer<String, Float> listener : downloadUpdateListeners) {
-                            listener.accept(id, (float) totalBytesRead / (float) totalLength);
+                            currentProgress = (float) totalBytesRead / (float) totalLength;
+                            listener.accept(id, currentProgress);
                         }
                     }
                     Files.move(getDownloadPath(id), getLocalMediaFile(id));

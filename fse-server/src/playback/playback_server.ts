@@ -1,15 +1,12 @@
 
-import { Server as SocketServer, Socket } from 'socket.io';
-import express, { request } from 'express';
-import { Server } from 'http'
-import auth from '../api/auth';
-import passport from 'passport';
-import passportSocketIo from 'passport.socketio';
-import PlayBill from '../playbill';
-import { PlaybackReplicationModel, Replicator } from 'fse-shared/dist/replication';
+import express from 'express';
 import { DownloadStatus, FilmInfo } from 'fse-shared/dist/meta';
-import pipeline from '../pipeline';
-import { deprecate } from 'util';
+import { Replicator } from 'fse-shared/dist/replication';
+import { Server } from 'http';
+import passport from 'passport';
+import { Server as SocketServer, Socket } from 'socket.io';
+import auth from '../api/auth';
+import PlayBill from '../playbill';
 
 // Bullshittary to avoid the fact that Socket.io isn't typed to follow the official example properly.
 const wrap = (middleware: express.RequestHandler) => (socket: any, next: any) => middleware(socket.request, {} as any, next);
@@ -47,9 +44,9 @@ export class SocketServerReplicator<T extends object> extends Replicator<T> {
 export default class PlaybackServer {
     private _io: SocketServer
     private _playbill: PlayBill;
-    private _downloadQueue: string[] = [];
-    private _head = 0;
     private _connection: Socket | null = null;
+    private _downloads: Record<string, DownloadStatus> = {};
+    private _head: number = 0;
 
     /**
      * Construct a playback server.
@@ -87,19 +84,26 @@ export default class PlaybackServer {
         return this._playbill;
     }
 
-    public get downloadQueue() {
-        return this._downloadQueue;
-    }
-
-    public get head() {
-        return this._head;
-    }
 
     /**
      * The currently connected playback client.
      */
     public get connection() {
         return this._connection;
+    }
+
+    /**
+     * The state of downloads on the client, the last time the server heard about them.
+     */
+    public get downloads() {
+        return this._downloads;
+    }
+
+    /**
+     * The current playback head of the client, the last time the server heard about it.
+     */
+    public get head() {
+        return this._head;
     }
 
     private initConnection(socket: Socket) {
@@ -113,34 +117,26 @@ export default class PlaybackServer {
         console.log(`Saving sid ${socket.id} in session ${session.id}`);
         (session as any).socketId = socket.id;
 
-        socket.on('setDownloadQueue', queue => {
-            this._downloadQueue = queue;
-        });
-
+        // DEPRACATED
         socket.on('getFilms', (callback: (films: Record<string, FilmInfo>) => void) => {
             callback(this.playbill.films);
         });
 
+        // DEPRACATED
         socket.on('getOrder', (callback: (order: string[]) => void) => {
             callback(this.playbill.order);
         });
-
-        socket.on('setHead', (head: number) => {
-            this._head = head;
-            console.log(`Client is playing film at index ${head}`) // TESTING ONLY
-        })
 
         socket.on('disconnect', () => {
             this._connection = null;
         })
 
-        socket.emit('setFilmOrder', this.playbill.order)
+        socket.on('setHead', (head: number) => {
+            this._head = head;
+        })
 
-        pipeline.downloadingFilms = {}; // We need to wait for the client to tell us about its download status.
         socket.on('updateDownloadStatus', (status: Record<string, DownloadStatus>) => {
-            Object.keys(status).forEach(id => {
-                pipeline.downloadingFilms[id] = status[id];
-            })
+            Object.assign(this._downloads, status)
         })
 
         this._connection = socket
@@ -154,18 +150,11 @@ export default class PlaybackServer {
         this.playbill.onModifyFilm((id, data) => {
             this.io.emit('modifyFilm', id, data);
         })
-    }
-
-    /**
-     * Provide the client with a new copy of the download queue.
-     */
-    refreshDownloadQueue() {
-        this.io.emit('setDownloadQueue', this.downloadQueue);
+        
     }
 
     public setDownloadQueue(queue: string[]) {
-        this._downloadQueue = queue;
-        this.refreshDownloadQueue();
+        this.io.emit('setDownloadQueue', queue);
     }
 
     /**
@@ -173,7 +162,40 @@ export default class PlaybackServer {
      * @param id Film ID
      */
     public queueDownload(id: string) {
-        this.downloadQueue.push(id);
-        this.refreshDownloadQueue();
+        this.io.emit('queueDownload', id);
+    }
+
+    /**
+     * Ask the client for the current playback head.
+     * @returns The index of the film that's currently playing.
+     */
+    public getHead(): Promise<number> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.io.emit('getHead', (head: number) => {
+                    this._head = head;
+                    resolve(head)
+                })
+            } catch (e) {
+                reject(e)
+            }
+        })
+    }
+
+    /**
+     * Ask the client for the download status of one or more films. 
+     * @param ids The films. If undefined, all films are retrieved.
+     * @returns A record with film IDs and their download statuses.
+     */
+    public getDownloadStatus(ids?: string[]): Promise<Record<string, DownloadStatus>> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.io.emit('getDownloadStatus', (items: Record<string, DownloadStatus>) => {
+                    resolve(items)
+                })
+            } catch (e) {
+                reject(e)
+            }
+        })
     }
 }

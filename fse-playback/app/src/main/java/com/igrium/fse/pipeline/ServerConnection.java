@@ -20,11 +20,14 @@ import java.util.function.Consumer;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import com.igrium.fse.pipeline.Events.ModifyFilmEvent;
 import com.igrium.fse.pipeline.FailedLoginException.Type;
+
 import com.igrium.fse.util.EventDispatcher;
 
+import io.socket.client.Ack;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 
@@ -42,6 +45,7 @@ public class ServerConnection extends EventDispatcher<String> {
 
     protected Map<String, FilmInfo> films = new HashMap<>();
     protected List<String> order = new ArrayList<>();
+    protected LocalMediaManager mediaManager;
 
     private Socket socket;
 
@@ -83,6 +87,64 @@ public class ServerConnection extends EventDispatcher<String> {
             films.put(id, filmInfo);
             fireEvent("modifyFilm", new ModifyFilmEvent(id, filmInfo));
         });
+
+        socket.on("setDownloadQueue", args -> {
+            if (mediaManager == null) return;
+
+            try {
+                List<String> queue = new ArrayList<>();
+                JSONArray json = (JSONArray) args[0];
+                for (int i = 0; i < json.length(); i++) {
+                    queue.add(json.getString(i));
+                }
+                mediaManager.setDownloadQueue(queue);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        socket.on("queueDownload", args -> {
+            if (mediaManager == null) return;
+            mediaManager.queueDownload((String) args[0]);
+        });
+
+        socket.on("getDownloadStatus", args -> {
+            Ack callback = (Ack) args[0];
+
+            if (mediaManager == null) {
+                callback.call(new JSONObject());
+                return;
+            }
+
+            List<String> ids = new ArrayList<>();
+            if (args.length > 1) {
+                try {
+                    JSONArray requested = (JSONArray) args[1];
+                    for (int i = 0; i < requested.length(); i++) {
+                        ids.add(requested.getString(i));
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    ids.clear();
+                }
+            }
+
+            if (ids.size() == 0) {
+                ids.addAll(films.keySet());
+            }
+
+            JSONObject obj = new JSONObject();
+
+            for (String id : ids) {
+                try {
+                    obj.put(id, mediaManager.getDownloadStatus(id).toJSONObject());
+                } catch (JSONException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+
+            callback.call(obj);
+        });
     }
 
     /**
@@ -101,13 +163,13 @@ public class ServerConnection extends EventDispatcher<String> {
         addListener("modifyFilm", listener);
     }
     
-
+ 
     public HttpClient getHttpClient() {
         return httpClient;
     }
 
     /**
-     * Get the address of the FSE server.
+     * Get the address of the FSE server..
      * 
      * @return Server address.
      */
@@ -127,12 +189,49 @@ public class ServerConnection extends EventDispatcher<String> {
         return order;
     }
 
+    public URI getFilmAddress(String id) {
+        return getAddress().resolve("/api/media?id="+id);
+    }
+
     /**
      * Get the file extension of the video files that will be delivered by the server.
      * @return The file extention. Example: ".mp4"
      */
     public String getFileExtension() {
         return ".mp4";
+    }
+
+    /**
+     * Setup and attach a local media manager to this server connection.
+     * @param mediaManager Media manager to use.
+     */
+    public void setupLocalMediaManager(LocalMediaManager mediaManager) {
+        if (mediaManager == null) {
+            this.mediaManager = null;
+            return;
+        }
+        mediaManager.setDownloadFunction(id -> {
+            return getFilmAddress(id).toURL().openConnection();
+        });
+
+        mediaManager.onDownloadUpdate((id, status) -> {
+            try {
+                JSONObject obj = new JSONObject();
+                obj.put(id, mediaManager.getDownloadStatus(id).toJSONObject());
+                socket.emit("updateDownloadStatus", obj);
+            } catch (JSONException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        this.mediaManager = mediaManager;
+    }
+    
+    /**
+     * Get the current local media manager.
+     * @return Local media manager, or <code>null</code> if none has been setup.
+     */
+    public LocalMediaManager getLocalMediaManager() {
+        return mediaManager;
     }
 
     protected static ServerConnection connectImpl(URI address, Credentials credentials) throws FailedLoginException {
